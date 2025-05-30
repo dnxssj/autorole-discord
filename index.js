@@ -1,6 +1,8 @@
+require('./keep_alive.js');
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
+
 
 dotenv.config();
 const config = JSON.parse(fs.readFileSync('./config.json'));
