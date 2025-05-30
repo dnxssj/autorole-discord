@@ -35,7 +35,7 @@ client.once('ready', async () => {
         '🌸 → rosa_pastel\n' +
         '⚫ → gris_carbon\n' +
         '🤍 → blanco\n' +
-        '🟡 → amarillo_dorado\n\n'
+        '🟡 → amarillo_crema\n\n'
       )
       .setColor(0x9b59b6);
 
