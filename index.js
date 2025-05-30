@@ -1,4 +1,4 @@
-require('./keep_alive.js');
+import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
