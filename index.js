@@ -3,7 +3,6 @@ import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
-
 dotenv.config();
 const config = JSON.parse(fs.readFileSync('./config.json'));
 const client = new Client({
@@ -21,7 +20,6 @@ client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
   const channel = await client.channels.fetch(config.channelId);
 
-  // Mensaje de roles de color
   if (!config.colorMessageId) {
     const embed = new EmbedBuilder()
       .setTitle('🎨 Colores de Nickname – Selección Actual')
@@ -49,8 +47,7 @@ client.once('ready', async () => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-  if (user.bot) return;
-  if (!reaction.message.guild) return;
+  if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
 
   const { colorRoles } = config;
@@ -59,11 +56,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (isColor) {
     const roleName = colorRoles[reaction.emoji.name];
     const group = Object.values(colorRoles);
-
     const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
     if (!role) return;
 
-    // Eliminar roles anteriores del grupo de colores
     for (const name of group) {
       const r = reaction.message.guild.roles.cache.find(ro => ro.name === name);
       if (r && member.roles.cache.has(r.id)) await member.roles.remove(r);
@@ -74,8 +69,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
-  if (user.bot) return;
-  if (!reaction.message.guild) return;
+  if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
 
   const { colorRoles } = config;
@@ -83,6 +77,100 @@ client.on('messageReactionRemove', async (reaction, user) => {
   const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
   if (role && member.roles.cache.has(role.id)) {
     await member.roles.remove(role).catch(console.error);
+  }
+});
+
+// --- SISTEMA DE XP Y RANGOS ---
+
+const xpFile = './xp.json';
+let xpData = fs.existsSync(xpFile) ? JSON.parse(fs.readFileSync(xpFile)) : {};
+
+function getLevel(xp) {
+  return Math.floor(0.1 * Math.sqrt(xp));
+}
+
+function getRequiredXp(level) {
+  return Math.floor(Math.pow((level + 1) / 0.1, 2));
+}
+
+const rankRoles = {
+  10: 'Nova',
+  50: 'Spectra',
+  100: 'Blight',
+  200: 'Cyanite',
+  300: 'Velkyr',
+  400: 'Oblivion',
+  500: 'Sunfall',
+  600: 'Cryora',
+  800: 'Ashen',
+  1000: 'Zenthyr',
+  5000: 'YAPPER',
+  10000: 'VIP'
+};
+
+function getRankName(level) {
+  const levels = Object.keys(rankRoles).map(Number).sort((a, b) => a - b);
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (level >= levels[i]) return rankRoles[levels[i]];
+  }
+  return null;
+}
+
+client.on('messageCreate', async message => {
+  if (message.author.bot || !message.guild) return;
+
+  const userId = message.author.id;
+  if (!xpData[userId]) {
+    xpData[userId] = { xp: 0, level: 0, lastRank: null };
+  }
+
+  const userXp = xpData[userId];
+  userXp.xp += Math.floor(Math.random() * 10) + 5;
+
+  const newLevel = getLevel(userXp.xp);
+  if (newLevel > userXp.level) {
+    userXp.level = newLevel;
+
+    const rankName = getRankName(newLevel);
+    const announceChannel = await client.channels.fetch(config.levelUpChannelId).catch(() => null);
+    if (announceChannel) {
+      const embed = new EmbedBuilder()
+        .setTitle('📈 ¡Nuevo nivel alcanzado!')
+        .setDescription(`${message.author} ha subido al nivel **${newLevel}**.`)
+        .setColor(0x00bfff);
+      await announceChannel.send({ embeds: [embed] });
+    }
+
+    if (rankName && userXp.lastRank !== rankName) {
+      const currentRanks = Object.values(rankRoles);
+      const member = message.member;
+      const guild = message.guild;
+
+      for (const rName of currentRanks) {
+        const role = guild.roles.cache.find(r => r.name === rName);
+        if (role && member.roles.cache.has(role.id)) await member.roles.remove(role);
+      }
+
+      const newRole = guild.roles.cache.find(r => r.name === rankName);
+      if (newRole) {
+        await member.roles.add(newRole).catch(console.error);
+        userXp.lastRank = rankName;
+      }
+    }
+  }
+
+  fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
+});
+
+client.on('messageCreate', message => {
+  if (message.content === '!xp' && !message.author.bot) {
+    const userId = message.author.id;
+    const data = xpData[userId] || { xp: 0, level: 0 };
+    const nextLevelXp = getRequiredXp(data.level);
+    message.reply(
+      `📊 Nivel: ${data.level}\n` +
+      `🔹 XP: ${data.xp} / ${nextLevelXp} para el siguiente nivel.`
+    );
   }
 });
 
