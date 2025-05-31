@@ -94,16 +94,16 @@ function getRequiredXp(level) {
 }
 
 const rankRoles = {
-  10: 'Nova',
-  50: 'Spectra',
-  100: 'Blight',
-  200: 'Cyanite',
-  300: 'Velkyr',
-  400: 'Oblivion',
-  500: 'Sunfall',
-  600: 'Cryora',
-  800: 'Ashen',
-  1000: 'Zenthyr',
+  10: 'Nivel 1 ~ Nova',
+  50: 'Nivel 2 ~ Spectra',
+  100: 'Nivel 3 ~ Blight',
+  200: 'Nivel 4 ~ Cyanite',
+  300: 'Nivel 5 ~ Velkyr',
+  400: 'Nivel 6 ~ Oblivion',
+  500: 'Nivel 7 ~ Sunfall',
+  600: 'Nivel 8 ~ Cryora',
+  800: 'Nivel 9 ~ Ashen',
+  1000: 'Nivel 10 ~ Zenthyr',
   5000: 'YAPPER',
   10000: 'VIP'
 };
@@ -173,5 +173,44 @@ client.on('messageCreate', async message => {
 
   fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
 });
+
+client.on('messageCreate', async message => {
+  if (message.author.bot || !message.guild) return;
+
+  if (message.content.startsWith('!rank')) {
+    const mention = message.mentions.members.first();
+    const member = mention || message.member;
+    const user = member.user;
+    const userId = user.id;
+
+    const data = xpData[userId] || { xp: 0, level: 0, lastRank: null };
+    const level = data.level;
+    const xp = data.xp;
+    const nextXp = getRequiredXp(level);
+    const rank = getRankName(level) || 'Sin rango';
+
+    // Calcular barra de progreso
+    const totalBars = 10;
+    const progress = Math.min(xp / nextXp, 1); // por si se pasa
+    const filledBars = Math.round(progress * totalBars);
+    const emptyBars = totalBars - filledBars;
+    const progressBar = `[${'█'.repeat(filledBars)}${'░'.repeat(emptyBars)}]`;
+
+    const embed = new EmbedBuilder()
+      .setTitle(`Rango de ${member.displayName}`)
+      .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+      .addFields(
+        { name: 'Usuario', value: user.tag, inline: true },
+        { name: 'Nivel', value: `${level}`, inline: true },
+        { name: 'XP', value: `${xp} / ${nextXp}`, inline: true },
+        { name: 'Progreso', value: `${progressBar}`, inline: false },
+        { name: 'Rango actual', value: `${rank}`, inline: false }
+      )
+      .setColor(0x3498db);
+
+    message.reply({ embeds: [embed] });
+  }
+});
+
 
 client.login(process.env.TOKEN);
