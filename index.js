@@ -120,6 +120,18 @@ client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
 
   const userId = message.author.id;
+
+  // --- COMANDO !xp ---
+  if (message.content === '!xp') {
+    const data = xpData[userId] || { xp: 0, level: 0 };
+    const nextLevelXp = getRequiredXp(data.level);
+    return message.reply(
+      `📊 Nivel: ${data.level}\n` +
+      `🔹 XP: ${data.xp} / ${nextLevelXp} para el siguiente nivel.`
+    );
+  }
+
+  // --- GANAR XP ---
   if (!xpData[userId]) {
     xpData[userId] = { xp: 0, level: 0, lastRank: null };
   }
@@ -160,18 +172,6 @@ client.on('messageCreate', async message => {
   }
 
   fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
-});
-
-client.on('messageCreate', message => {
-  if (message.content === '!xp' && !message.author.bot) {
-    const userId = message.author.id;
-    const data = xpData[userId] || { xp: 0, level: 0 };
-    const nextLevelXp = getRequiredXp(data.level);
-    message.reply(
-      `📊 Nivel: ${data.level}\n` +
-      `🔹 XP: ${data.xp} / ${nextLevelXp} para el siguiente nivel.`
-    );
-  }
 });
 
 client.login(process.env.TOKEN);
