@@ -5,9 +5,6 @@ import fs from 'fs';
 
 dotenv.config();
 const config = JSON.parse(fs.readFileSync('./config.json'));
-const xpFile = './xp.json';
-let xpData = fs.existsSync(xpFile) ? JSON.parse(fs.readFileSync(xpFile)) : {};
-
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -18,37 +15,6 @@ const client = new Client({
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
-
-const rankRoles = {
-  10: 'Nivel 1 ~ Nova',
-  50: 'Nivel 2 ~ Spectra',
-  100: 'Nivel 3 ~ Blight',
-  200: 'Nivel 4 ~ Cyanite',
-  300: 'Nivel 5 ~ Velkyr',
-  400: 'Nivel 6 ~ Oblivion',
-  500: 'Nivel 7 ~ Sunfall',
-  600: 'Nivel 8 ~ Cryora',
-  800: 'Nivel 9 ~ Ashen',
-  1000: 'Nivel 10 ~ Zenthyr',
-  5000: 'YAPPER',
-  10000: 'VIP'
-};
-
-function getLevel(xp) {
-  return Math.floor(0.1 * Math.sqrt(xp));
-}
-
-function getRequiredXp(level) {
-  return Math.floor(Math.pow((level + 1) / 0.1, 2));
-}
-
-function getRankName(level) {
-  const levels = Object.keys(rankRoles).map(Number).sort((a, b) => a - b);
-  for (let i = levels.length - 1; i >= 0; i--) {
-    if (level >= levels[i]) return rankRoles[levels[i]];
-  }
-  return null;
-}
 
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
@@ -83,6 +49,7 @@ client.once('ready', async () => {
 client.on('messageReactionAdd', async (reaction, user) => {
   if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
+
   const { colorRoles } = config;
   const isColor = reaction.message.id === config.colorMessageId;
 
@@ -104,6 +71,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 client.on('messageReactionRemove', async (reaction, user) => {
   if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
+
   const { colorRoles } = config;
   const roleName = colorRoles[reaction.emoji.name];
   const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
@@ -112,46 +80,46 @@ client.on('messageReactionRemove', async (reaction, user) => {
   }
 });
 
+// --- SISTEMA DE XP Y RANGOS ---
+
+const xpFile = './xp.json';
+let xpData = fs.existsSync(xpFile) ? JSON.parse(fs.readFileSync(xpFile)) : {};
+
+function getLevel(xp) {
+  return Math.floor(0.1 * Math.sqrt(xp));
+}
+
+function getRequiredXp(level) {
+  return Math.floor(Math.pow((level + 1) / 0.1, 2));
+}
+
+const rankRoles = {
+  10: 'Nivel 1 ~ Nova',
+  50: 'Nivel 2 ~ Spectra',
+  100: 'Nivel 3 ~ Blight',
+  200: 'Nivel 4 ~ Cyanite',
+  300: 'Nivel 5 ~ Velkyr',
+  400: 'Nivel 6 ~ Oblivion',
+  500: 'Nivel 7 ~ Sunfall',
+  600: 'Nivel 8 ~ Cryora',
+  800: 'Nivel 9 ~ Ashen',
+  1000: 'Nivel 10 ~ Zenthyr',
+  5000: 'YAPPER',
+  10000: 'VIP'
+};
+
+function getRankName(level) {
+  const levels = Object.keys(rankRoles).map(Number).sort((a, b) => a - b);
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (level >= levels[i]) return rankRoles[levels[i]];
+  }
+  return null;
+}
+
 client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
 
   const userId = message.author.id;
-
-  if (message.content === '!xp') {
-    const data = xpData[userId] || { xp: 0, level: 0 };
-    const nextLevelXp = getRequiredXp(data.level);
-    return message.reply(
-      `📊 Nivel: ${data.level}\n` +
-      `🔹 XP: ${data.xp} / ${nextLevelXp} para el siguiente nivel.`
-    );
-  }
-
-  if (message.content.startsWith('!rank')) {
-    const target =
-      message.mentions.members.first() ||
-      message.guild.members.cache.get(message.content.split(' ')[1]) ||
-      message.member;
-
-    const targetId = target.id;
-    const data = xpData[targetId] || { xp: 0, level: 0 };
-    const rankName = getRankName(data.level) || 'Sin rango';
-
-    const embed = new EmbedBuilder()
-      .setTitle(`📛 Perfil de ${target.displayName}`)
-      .setThumbnail(target.user.displayAvatarURL({ dynamic: true }))
-      .addFields(
-        { name: 'Usuario', value: `${target.user.tag}`, inline: true },
-        {
-          name: 'Nivel y XP',
-          value: `🧬 Nivel: **${data.level}**\n🔹 XP: ${data.xp} / ${getRequiredXp(data.level)}`,
-          inline: true
-        },
-        { name: 'Rango actual', value: `🎖️ ${rankName}`, inline: true }
-      )
-      .setColor(0x3498db);
-    return message.reply({ embeds: [embed] });
-  }
-
   if (!xpData[userId]) {
     xpData[userId] = { xp: 0, level: 0, lastRank: null };
   }
@@ -162,6 +130,7 @@ client.on('messageCreate', async message => {
   const newLevel = getLevel(userXp.xp);
   if (newLevel > userXp.level) {
     userXp.level = newLevel;
+
     const rankName = getRankName(newLevel);
     const announceChannel = await client.channels.fetch(config.levelUpChannelId).catch(() => null);
     if (announceChannel) {
@@ -191,6 +160,37 @@ client.on('messageCreate', async message => {
   }
 
   fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
+});
+
+client.on('messageCreate', async message => {
+  if (message.author.bot || !message.guild) return;
+
+  if (message.content.startsWith('!rank')) {
+    const mentionedUser = message.mentions.users.first() || message.author;
+    const member = await message.guild.members.fetch(mentionedUser.id);
+    const userData = xpData[mentionedUser.id] || { xp: 0, level: 0, lastRank: null };
+
+    const xp = userData.xp;
+    const level = userData.level;
+    const requiredXp = getRequiredXp(level);
+    const rankName = getRankName(level) || 'Sin rango';
+
+    const progress = Math.floor((xp / requiredXp) * 10);
+    const progressBar = '▰'.repeat(progress) + '▱'.repeat(10 - progress);
+
+    const embed = new EmbedBuilder()
+      .setTitle(`📊 Perfil de ${member.displayName}`)
+      .setThumbnail(mentionedUser.displayAvatarURL({ dynamic: true }))
+      .addFields(
+        { name: 'Usuario', value: mentionedUser.tag, inline: true },
+        { name: 'Nivel', value: `${level}`, inline: true },
+        { name: 'XP', value: `\`${xp} / ${requiredXp}\`\n\n${progressBar}`, inline: false },
+        { name: 'Rango', value: rankName, inline: false }
+      )
+      .setColor(0x5865f2);
+
+    message.reply({ embeds: [embed] });
+  }
 });
 
 client.login(process.env.TOKEN);
