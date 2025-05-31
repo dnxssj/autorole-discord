@@ -28,6 +28,5 @@ Thumbs.db
 # VSCode settings (opcional)
 .vscode/
 
-# Archivos sensibles y de estado
-xp.json
+
 
