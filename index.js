@@ -208,41 +208,42 @@ if (message.content.startsWith('!me')) {
     ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin mejor amig@'
     : 'Sin mejor amig@';
 
-  const canvas = createCanvas(600, 600);
-  const ctx = canvas.getContext('2d');
+// Crear canvas
+const canvas = createCanvas(600, 600);
+const ctx = canvas.getContext('2d');
 
-  // Fondo
-  ctx.fillStyle = '#3d405b';  // gris oscuro
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+// Fondo plano
+ctx.fillStyle = '#3d405b';  
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Avatar (circular centrado arriba)
-  const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
-  const avatarX = canvas.width / 2 - 64;
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(avatar, avatarX, 46, 128, 128);
-  ctx.restore();
+// Avatar (circular, centrado)
+const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
+const avatarX = canvas.width / 2 - 64;
+ctx.beginPath();
+ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
+ctx.closePath();
+ctx.clip();
+ctx.drawImage(avatar, avatarX, 46, 128, 128);
+ctx.restore();
 
-  // Texto
-  ctx.fillStyle = '#faf9f7';
-  ctx.textAlign = 'center';
+// Texto (sin sombra)
+ctx.fillStyle = '#faf9f7';
+ctx.textAlign = 'center';
 
-  // Nombre
-  ctx.font = 'bold 36px RobotoBold';
-  ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
+// Nombre en mayúscula
+ctx.font = 'bold 36px sans-serif';
+ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
 
-  // Coordenadas base
-  const x = canvas.width / 2;
-  const y = 260;
+// Coordenadas base
+const x = canvas.width / 2;
+const y = 260;
 
-  // Resto de textos 
-  ctx.font = '22px RobotoLight';
-  ctx.fillText(`Nivel: ${userData.level}`, x, y);
-  ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
-  ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
-  ctx.fillText(`Mejor amig@: ${bff}`, x, y + 100);
+// Resto de textos
+ctx.font = '22px sans-serif';
+ctx.fillText(`Nivel: ${userData.level}`, x, y);
+ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
+ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
+ctx.fillText(`Mejor amig@: ${bff}`, x, y + 100);
 
 
   // Enviar imagen
