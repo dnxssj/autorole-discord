@@ -229,21 +229,9 @@ if (message.content.startsWith('!me')) {
   ctx.fillStyle = '#faf9f7';
   ctx.textAlign = 'center';
 
-  // Sombra para el nombre
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
-
   // Nombre
   ctx.font = 'bold 36px RobotoBold';
   ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
-
-  // Quitar sombra
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   // Coordenadas base
   const x = canvas.width / 2;
