@@ -1,8 +1,8 @@
 import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import { createCanvas, loadImage, registerFont } from 'canvas';
-registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto' });
-registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto' });
+registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'RobotoBold' });
+registerFont('./fonts/static/Roboto-Light.ttf', { family: 'RobotoLight' });
 import dotenv from 'dotenv';
 import fs from 'fs';
 
@@ -236,7 +236,7 @@ if (message.content.startsWith('!me')) {
   ctx.shadowOffsetY = 2;
 
   // Nombre
-  ctx.font = 'bold 36px sans-serif';
+  ctx.font = 'bold 36px RobotoBold';
   ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
 
   // Quitar sombra
@@ -250,7 +250,7 @@ if (message.content.startsWith('!me')) {
   const y = 260;
 
   // Resto de textos 
-  ctx.font = '22px sans-serif';
+  ctx.font = '22px RobotoLight';
   ctx.fillText(`Nivel: ${userData.level}`, x, y);
   ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
   ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
