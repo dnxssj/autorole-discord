@@ -135,6 +135,28 @@ client.on('messageCreate', async message => {
 
   const authorId = message.author.id;
 
+  if (message.content === '!backup') {
+    const allowedIds = [process.env.ADMIN_ID_1, process.env.ADMIN_ID_2];
+    if (!allowedIds.includes(message.author.id)) {
+      return message.reply('Este comando es solo para usuarios autorizados.');
+    }
+
+    const archivos = ['xp.json', 'parejas.json', 'amistades.json'].filter(file => fs.existsSync(`./${file}`));
+    if (archivos.length === 0) return message.reply('No hay archivos para respaldar.');
+
+    try {
+      await message.author.send({
+        content: '📦 Aquí tienes los archivos de backup actuales:',
+        files: archivos.map(file => ({ attachment: `./${file}`, name: file }))
+      });
+      message.reply('✅ Backup enviado por mensaje privado.');
+    } catch (error) {
+      message.reply('❌ No pude enviarte el mensaje privado. ¿Tienes los DMs desactivados?');
+    }
+  }
+
+
+
 if (message.content === '!help') {
   const helpEmbed = new EmbedBuilder()
     .setTitle('🤖 Comandos disponibles')
@@ -333,6 +355,9 @@ if (message.content === '!divorce') {
   if (message.content === '!murcia') {
       const chistes = [
         '¿Por qué en Murcia no usan GPS? Porque todos los caminos llevan a una huerta.',
+        '? qué es Murcia?',
+        'Murcia no existe, chaval',
+        'No me se chistes sobre desiertos',
         '¿Cómo se llama un murciano sin acento? ¡Turista!',
         '—Oye Paco, ¿y esa camisa tan chula? —Es de Huertza Prímavhera, la tienda más fashion de Murcia.',
         'En Murcia no llueve, el cielo solo riega las lechugas.',
