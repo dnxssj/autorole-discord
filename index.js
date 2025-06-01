@@ -133,7 +133,35 @@ client.on('messageCreate', async message => {
 
   const authorId = message.author.id;
 
-  if (message.content === '!relación') {
+if (message.content === '!help') {
+  const helpEmbed = new EmbedBuilder()
+    .setTitle('🤖 Comandos disponibles')
+    .setColor(0x9b59b6)
+    .setDescription('Aquí tienes una lista de comandos que puedes usar con este bot:')
+    .addFields(
+      {
+        name: '🧪 Sistema de niveles',
+        value: '`!rank [@usuario]` – Muestra tu nivel, XP y rango actual.\n`!me [@usuario]` – Perfil detallado del usuario: roles, XP, estado civil, etc.'
+      },
+      {
+        name: '💘 Sistema de parejas',
+        value: '`!marryme @usuario` – Envía una propuesta de pareja.\n`!divorce` – Solicita el divorcio con confirmación de la pareja.\n`!relacion` – Muestra tu pareja actual si tienes una.'
+      },
+      {
+        name: '🌟 Sistema de amistad',
+        value: '`!bffme @usuario` – Propón una amistad (solo una activa a la vez).'
+      },
+      {
+        name: '🤣 Entretenimiento',
+        value: '`!murcia` – Muestra un chiste aleatorio sobre Murcia.'
+      }
+    )
+    .setFooter({ text: 'Bot desarrollado por DNX - Dexter\'s Lab' });
+
+  message.reply({ embeds: [helpEmbed] });
+}
+
+  if (message.content === '!relacion') {
     const parejaId = parejasData[authorId];
     if (!parejaId) return message.reply('💔 Actualmente no tienes pareja registrada.');
     const pareja = await message.guild.members.fetch(parejaId).catch(() => null);
@@ -163,37 +191,102 @@ ${userData.lastRank || 'Sin rango'}`, inline: true },
     message.reply({ embeds: [embed] });
   }
 
-  if (message.content.startsWith('!marryme')) {
-    const target = message.mentions.users.first();
-    if (!target || target.bot || target.id === authorId) return message.reply('Menciona a una persona válida.');
-    const emparejado = Object.entries(parejasData).some(([uid, pid]) => [uid, pid].includes(authorId) || [uid, pid].includes(target.id));
-    if (emparejado) return message.reply('Uno de los dos ya tiene pareja.');
+if (message.content.startsWith('!marryme')) {
+  const target = message.mentions.users.first();
+  const authorId = message.author.id;
 
-    const msg = await message.channel.send(`${target}, ${message.author} quiere ser tu pareja 💍\n¿Aceptas? ✅ o ❌`);
-    await msg.react('✅'); await msg.react('❌');
+  if (!target || target.bot || target.id === authorId)
+    return message.reply('Menciona a una persona válida.');
 
-    msg.awaitReactions({ filter: (r, u) => ['✅', '❌'].includes(r.emoji.name) && u.id === target.id, max: 1, time: 60000, errors: ['time'] })
-      .then(collected => {
-        if (collected.first().emoji.name === '✅') {
-          parejasData[authorId] = target.id;
-          parejasData[target.id] = authorId;
-          fs.writeFileSync(parejasFile, JSON.stringify(parejasData, null, 2));
-          message.channel.send({ content: `💖 ¡${message.author} y ${target} ahora son pareja! 🎉`, files: ['https://media.tenor.com/85IoIO0cJx8AAAAC/inuyasha-shippo.gif'] });
-        } else {
-          message.channel.send('😢 Propuesta rechazada.');
-        }
-      }).catch(() => message.channel.send('⏰ Tiempo agotado.'));
+  const emparejado = Object.entries(parejasData).some(([uid, pid]) =>
+    [uid, pid].includes(authorId) || [uid, pid].includes(target.id)
+  );
+
+  if (emparejado)
+    return message.reply('Uno de los dos ya tiene pareja.');
+
+  const msg = await message.channel.send(
+    `${target}, ${message.author} quiere ser tu pareja 💍\n¿Aceptas? ✅ o ❌`
+  );
+
+  await msg.react('✅');
+  await msg.react('❌');
+
+  msg.awaitReactions({
+    filter: (r, u) =>
+      ['✅', '❌'].includes(r.emoji.name) && u.id === target.id,
+    max: 1,
+    time: 60000,
+    errors: ['time']
+  })
+    .then(collected => {
+      if (collected.first().emoji.name === '✅') {
+        parejasData[authorId] = target.id;
+        parejasData[target.id] = authorId;
+        fs.writeFileSync(parejasFile, JSON.stringify(parejasData, null, 2));
+
+        message.channel.send({
+          content: `💖 ¡${message.author} y ${target} ahora son pareja! 🎉\nhttps://tenor.com/view/inuyasha-shippo-funny-anime-gif-24104596`
+        });
+      } else {
+        message.channel.send('😢 Propuesta rechazada.');
+      }
+    })
+    .catch(() => message.channel.send('⏰ Tiempo agotado.'));
+}
+
+
+if (message.content === '!divorce') {
+  const authorId = message.author.id;
+  const parejaId = parejasData[authorId];
+
+  if (!parejaId) {
+    return message.reply('No estás en pareja actualmente 💔');
   }
 
-  if (message.content === '!divorce') {
-    const parejaId = parejasData[authorId];
-    if (!parejaId) return message.reply('No estás en pareja.');
-    const pareja = await client.users.fetch(parejaId);
+  const parejaUser = await message.guild.members.fetch(parejaId).catch(() => null);
+  if (!parejaUser) {
     delete parejasData[authorId];
     delete parejasData[parejaId];
     fs.writeFileSync(parejasFile, JSON.stringify(parejasData, null, 2));
-    message.channel.send({ content: `💔 ${message.author} y ${pareja.username} se han separado.`, files: ['https://media.tenor.com/jrxDb6Hn9JYAAAAC/divorce.gif'] });
+    return message.reply('Tu pareja ya no está en el servidor. Se ha terminado la relación.');
   }
+
+  const confirmMsg = await message.channel.send(
+    `${parejaUser}, ${message.author} quiere divorciarse de ti 💔\n¿Aceptas? ✅ o ❌`
+  );
+
+  await confirmMsg.react('✅');
+  await confirmMsg.react('❌');
+
+  confirmMsg.awaitReactions({
+    filter: (reaction, user) =>
+      ['✅', '❌'].includes(reaction.emoji.name) && user.id === parejaId,
+    max: 1,
+    time: 60000,
+    errors: ['time']
+  })
+    .then(collected => {
+      const reaction = collected.first();
+
+      if (reaction.emoji.name === '✅') {
+        delete parejasData[authorId];
+        delete parejasData[parejaId];
+        fs.writeFileSync(parejasFile, JSON.stringify(parejasData, null, 2));
+
+        message.channel.send({
+          content: `💔 ${message.author} y ${parejaUser} ya no están juntos...\nhttps://tenor.com/view/divorce-gif-20541960`
+        });
+      } else {
+        message.channel.send('😢 El divorcio ha sido rechazado.');
+      }
+    })
+    .catch(() => {
+      message.channel.send('⏰ Tiempo agotado. No se ha confirmado el divorcio.');
+    });
+}
+
+
 
   if (message.content.startsWith('!bffme')) {
   const target = message.mentions.users.first();
@@ -233,6 +326,21 @@ ${userData.lastRank || 'Sin rango'}`, inline: true },
       message.channel.send('⏰ Tiempo agotado, no se ha confirmado la amistad.');
     });
 }
+
+  if (message.content === '!murcia') {
+      const chistes = [
+        '¿Por qué en Murcia no usan GPS? Porque todos los caminos llevan a una huerta.',
+        '¿Cómo se llama un murciano sin acento? ¡Turista!',
+        '—Oye Paco, ¿y esa camisa tan chula? —Es de Huertza Prímavhera, la tienda más fashion de Murcia.',
+        'En Murcia no llueve, el cielo solo riega las lechugas.',
+        'Dicen que en Murcia las verduras se asustan cuando oyen “gazpacho”.',
+        '¿Sabes cómo se dice “wifi” en Murcia? Guifí, primo.',
+        '¿Por qué en Murcia no hacen películas de miedo? Porque ya tienen el calor de agosto.',
+        '¿Cómo se saluda un murciano elegante? ¡Muy güeno todo, señó!'
+      ];
+      const random = Math.floor(Math.random() * chistes.length);
+      await message.reply(chistes[random]);
+    }
 
 });
 
