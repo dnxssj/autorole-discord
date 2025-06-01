@@ -175,7 +175,8 @@ if (message.content === '!help') {
     const member = await message.guild.members.fetch(targetUser.id);
     const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
     const pareja = parejasData[targetUser.id] ? `<@${parejasData[targetUser.id]}> ❤️` : 'Solter@ 💔';
-    const bff = amistades[targetUser.id] ? `<@${amistades[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
+    const bff = amistadesData[targetUser.id] ? `<@${amistadesData[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
+
     const embed = new EmbedBuilder()
       .setTitle(`✨ Perfil de ${member.displayName}`)
       .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
