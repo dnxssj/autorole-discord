@@ -215,7 +215,7 @@ if (message.content.startsWith('!me')) {
   ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
   // Avatar (circular centrado arriba)
-  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png', size: 128 }));
+  const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
   const avatarX = canvas.width / 2 - 64;
   ctx.beginPath();
   ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
