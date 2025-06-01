@@ -192,7 +192,7 @@ if (message.content === '!help') {
     return message.reply(pareja ? `💞 Tu pareja es **${pareja.displayName}**.` : '😢 Tu pareja ya no está en el servidor.');
   }
 
- if (message.content.startsWith('!me')) {
+if (message.content.startsWith('!me')) {
   const targetUser = message.mentions.users.first() || message.author;
   const member = await message.guild.members.fetch(targetUser.id);
   const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
@@ -204,42 +204,43 @@ if (message.content === '!help') {
 
   const bffId = amistadesData[targetUser.id];
   const bff = bffId
-    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Desconocido'
+    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin nombre'
     : 'Sin mejor amig@';
 
-  const canvas = createCanvas(800, 400);
+  const canvas = createCanvas(800, 500);
   const ctx = canvas.getContext('2d');
 
-  // Fondo
-  ctx.fillStyle = '#ddb892';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Fondo personalizado
+  const background = await loadImage('./fondo_me_discord.png');
+  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  // Avatar
-  try {
-    const avatar = await loadImage(targetUser.displayAvatarURL({ dynamic: false, format: 'png', size: 128 }));
-    ctx.drawImage(avatar, 30, 30, 100, 100);
-  } catch (err) {
-    console.error('❌ Error al cargar el avatar:', err.message);
-    // Opcional: puedes dibujar un rectángulo vacío o un ícono por defecto
-    ctx.fillStyle = '#444';
-    ctx.fillRect(30, 30, 100, 100);
-  }
+  // Avatar como PNG estático
+  const avatarURL = targetUser.displayAvatarURL({ extension: 'png', size: 128 });
+  const avatar = await loadImage(avatarURL);
+  ctx.beginPath();
+  ctx.arc(100, 100, 50, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(avatar, 50, 50, 100, 100);
+  ctx.restore();
 
   // Texto
-  ctx.fillStyle = '#7f5539';
-  ctx.font = 'bold 28px Sans';
-  ctx.fillText(`Perfil de ${member.displayName}`, 150, 60);
+  ctx.fillStyle = '#81b29a';
+  ctx.font = 'bold 36px Roboto';
+  ctx.textAlign = 'center';
+  ctx.fillText(member.displayName, canvas.width / 2, 200);
 
-  ctx.font = '20px Sans';
-  ctx.fillText(`Nivel: ${userData.level}`, 150, 100);
-  ctx.fillText(`XP: ${userData.xp}`, 150, 130);
-  ctx.fillText(`Estado civil: ${pareja}`, 150, 170);
-  ctx.fillText(`Mejor amig@: ${bff}`, 150, 200);
+  ctx.font = '20px Roboto';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Nivel: ${userData.level}`, 200, 260);
+  ctx.fillText(`XP: ${userData.xp}`, 200, 290);
+  ctx.fillText(`Estado civil: ${pareja}`, 200, 320);
+  ctx.fillText(`Mejor amig@: ${bff}`, 200, 350);
+  ctx.fillText(`Rango: ${userData.lastRank}`, 200, 380);
 
   const buffer = canvas.toBuffer('image/png');
   message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
 }
-
 
 
 
