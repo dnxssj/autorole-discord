@@ -236,7 +236,7 @@ if (message.content.startsWith('!me')) {
   ctx.shadowOffsetY = 2;
 
   // Nombre
-  ctx.font = 'bold 36px Roboto';
+  ctx.font = 'bold 36px sans-serif';
   ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
 
   // Quitar sombra
@@ -249,8 +249,8 @@ if (message.content.startsWith('!me')) {
   const x = canvas.width / 2;
   const y = 260;
 
-  // Resto de textos en Roboto Light
-  ctx.font = '22px RobotoLight';
+  // Resto de textos 
+  ctx.font = '22px sans-serif';
   ctx.fillText(`Nivel: ${userData.level}`, x, y);
   ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
   ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
