@@ -207,8 +207,8 @@ if (message.content === '!help') {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Avatar
-  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png' }));
-  ctx.drawImage(avatar, 30, 30, 100, 100);
+  const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
+
 
   // Texto principal
   ctx.fillStyle = '#ffffff';
