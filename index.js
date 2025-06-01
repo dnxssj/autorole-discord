@@ -2,6 +2,7 @@ import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import { createCanvas, loadImage, registerFont } from 'canvas';
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto' });
+registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto' });
 import dotenv from 'dotenv';
 import fs from 'fs';
 
@@ -225,16 +226,36 @@ if (message.content.startsWith('!me')) {
   ctx.restore();
 
   // Texto
-  ctx.fillStyle = '#81b29a';
-  ctx.font = 'bold 32px Roboto';
+  ctx.fillStyle = '#faf9f7';
   ctx.textAlign = 'center';
-  ctx.fillText(member.displayName, canvas.width / 2, 200);
 
-  ctx.font = '22px Roboto';
-  ctx.fillText(`Nivel: ${userData.level}`, canvas.width / 2, 250);
-  ctx.fillText(`XP: ${userData.xp}`, canvas.width / 2, 290);
-  ctx.fillText(`Estado civil: ${pareja}`, canvas.width / 2, 340);
-  ctx.fillText(`Mejor amig@: ${bff}`, canvas.width / 2, 380);
+  // Sombra para el nombre
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  // Nombre
+  ctx.font = 'bold 36px Roboto';
+  ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
+
+  // Quitar sombra
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
+  // Coordenadas base
+  const x = canvas.width / 2;
+  const y = 260;
+
+  // Resto de textos en Roboto Light
+  ctx.font = '22px RobotoLight';
+  ctx.fillText(`Nivel: ${userData.level}`, x, y);
+  ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
+  ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
+  ctx.fillText(`Mejor amig@: ${bff}`, x, y + 100);
+
 
   // Enviar imagen
   const buffer = canvas.toBuffer('image/png');
