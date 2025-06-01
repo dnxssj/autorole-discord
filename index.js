@@ -11,6 +11,8 @@ const xpFile = './xp.json';
 let xpData = fs.existsSync(xpFile) ? JSON.parse(fs.readFileSync(xpFile)) : {};
 const parejasFile = './parejas.json';
 let parejasData = fs.existsSync(parejasFile) ? JSON.parse(fs.readFileSync(parejasFile)) : {};
+const amistadesFile = './amistades.json';
+let amistadesData = fs.existsSync(amistadesFile) ? JSON.parse(fs.readFileSync(amistadesFile)) : {};
 
 const client = new Client({
   intents: [
@@ -173,7 +175,6 @@ if (message.content === '!help') {
     const member = await message.guild.members.fetch(targetUser.id);
     const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
     const pareja = parejasData[targetUser.id] ? `<@${parejasData[targetUser.id]}> ❤️` : 'Solter@ 💔';
-    const amistades = fs.existsSync('./amistades.json') ? JSON.parse(fs.readFileSync('./amistades.json')) : {};
     const bff = amistades[targetUser.id] ? `<@${amistades[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
     const embed = new EmbedBuilder()
       .setTitle(`✨ Perfil de ${member.displayName}`)
@@ -285,6 +286,7 @@ if (message.content === '!divorce') {
       message.channel.send('⏰ Tiempo agotado. No se ha confirmado el divorcio.');
     });
 }
+
 
 
 
