@@ -1,7 +1,7 @@
 import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import { createCanvas, loadImage, registerFont } from 'canvas';
-registerFont('./fonts/Roboto-Bold.ttf', { family: 'Roboto' });
+registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto' });
 import dotenv from 'dotenv';
 import fs from 'fs';
 
