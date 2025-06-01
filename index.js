@@ -196,8 +196,16 @@ if (message.content === '!help') {
   const targetUser = message.mentions.users.first() || message.author;
   const member = await message.guild.members.fetch(targetUser.id);
   const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
-  const pareja = parejasData[targetUser.id] ? `<@${parejasData[targetUser.id]}> ❤️` : 'Solter@ 💔';
-  const bff = amistadesData[targetUser.id] ? `<@${amistadesData[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
+
+  const parejaId = parejasData[targetUser.id];
+  const pareja = parejaId
+    ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido'
+    : 'Solter@';
+
+  const bffId = amistadesData[targetUser.id];
+  const bff = bffId
+    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Desconocido'
+    : 'Sin mejor amig@';
 
   const canvas = createCanvas(800, 400);
   const ctx = canvas.getContext('2d');
@@ -207,24 +215,20 @@ if (message.content === '!help') {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Avatar
-  const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
+  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png', size: 128 }));
+  ctx.drawImage(avatar, 30, 30, 100, 100);
 
-
-  // Texto principal
+  // Texto
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 28px Sans';
   ctx.fillText(`Perfil de ${member.displayName}`, 150, 60);
 
-  // Nivel y XP
   ctx.font = '20px Sans';
   ctx.fillText(`Nivel: ${userData.level}`, 150, 100);
   ctx.fillText(`XP: ${userData.xp}`, 150, 130);
+  ctx.fillText(`Estado civil: ${pareja}`, 150, 170);
+  ctx.fillText(`Mejor amig@: ${bff}`, 150, 200);
 
-  // Estado civil y BFF
-  ctx.fillText(`💘 Estado civil: ${pareja}`, 150, 170);
-  ctx.fillText(`🌟 BFF: ${bff}`, 150, 200);
-
-  // Enviar imagen
   const buffer = canvas.toBuffer('image/png');
   message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
 }
