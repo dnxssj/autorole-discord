@@ -204,40 +204,39 @@ if (message.content.startsWith('!me')) {
 
   const bffId = amistadesData[targetUser.id];
   const bff = bffId
-    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin nombre'
+    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin mejor amig@'
     : 'Sin mejor amig@';
 
-  const canvas = createCanvas(800, 500);
+  const canvas = createCanvas(600, 600);
   const ctx = canvas.getContext('2d');
 
-  // Fondo personalizado
-  const background = await loadImage('./fondo_me_discord.png');
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+  // Fondo
+  const fondo = await loadImage('./fondo_me_discord.png');
+  ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-  // Avatar como PNG estático
-  const avatarURL = targetUser.displayAvatarURL({ extension: 'png', size: 128 });
-  const avatar = await loadImage(avatarURL);
+  // Avatar (circular centrado arriba)
+  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png', size: 128 }));
+  const avatarX = canvas.width / 2 - 64;
   ctx.beginPath();
-  ctx.arc(100, 100, 50, 0, Math.PI * 2);
+  ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
   ctx.closePath();
   ctx.clip();
-  ctx.drawImage(avatar, 50, 50, 100, 100);
+  ctx.drawImage(avatar, avatarX, 46, 128, 128);
   ctx.restore();
 
   // Texto
   ctx.fillStyle = '#81b29a';
-  ctx.font = 'bold 36px Roboto';
+  ctx.font = 'bold 32px Roboto';
   ctx.textAlign = 'center';
   ctx.fillText(member.displayName, canvas.width / 2, 200);
 
-  ctx.font = '20px Roboto';
-  ctx.textAlign = 'left';
-  ctx.fillText(`Nivel: ${userData.level}`, 200, 260);
-  ctx.fillText(`XP: ${userData.xp}`, 200, 290);
-  ctx.fillText(`Estado civil: ${pareja}`, 200, 320);
-  ctx.fillText(`Mejor amig@: ${bff}`, 200, 350);
-  ctx.fillText(`Rango: ${userData.lastRank}`, 200, 380);
+  ctx.font = '22px Roboto';
+  ctx.fillText(`Nivel: ${userData.level}`, canvas.width / 2, 250);
+  ctx.fillText(`XP: ${userData.xp}`, canvas.width / 2, 290);
+  ctx.fillText(`Estado civil: ${pareja}`, canvas.width / 2, 340);
+  ctx.fillText(`Mejor amig@: ${bff}`, canvas.width / 2, 380);
 
+  // Enviar imagen
   const buffer = canvas.toBuffer('image/png');
   message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
 }
