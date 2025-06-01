@@ -213,24 +213,27 @@ const canvas = createCanvas(600, 600);
 const ctx = canvas.getContext('2d');
 
 // Fondo plano
-ctx.fillStyle = '#3d405b';  
+ctx.fillStyle = '#1e1e1e';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// Avatar (circular, centrado)
+// Avatar
 const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
 const avatarX = canvas.width / 2 - 64;
+const avatarY = 46;
+
+ctx.save(); // Guardamos el contexto antes del clip
 ctx.beginPath();
 ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
 ctx.closePath();
 ctx.clip();
-ctx.drawImage(avatar, avatarX, 46, 128, 128);
-ctx.restore();
+ctx.drawImage(avatar, avatarX, avatarY, 128, 128);
+ctx.restore(); // Restauramos el contexto para que no afecte al texto
 
-// Texto (sin sombra)
+// Texto
 ctx.fillStyle = '#faf9f7';
 ctx.textAlign = 'center';
 
-// Nombre en mayúscula
+// Nombre
 ctx.font = 'bold 36px sans-serif';
 ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
 
@@ -238,7 +241,6 @@ ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
 const x = canvas.width / 2;
 const y = 260;
 
-// Resto de textos
 ctx.font = '22px sans-serif';
 ctx.fillText(`Nivel: ${userData.level}`, x, y);
 ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
