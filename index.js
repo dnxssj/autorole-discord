@@ -212,8 +212,8 @@ if (message.content.startsWith('!me')) {
   const ctx = canvas.getContext('2d');
 
   // Fondo
-  const fondo = await loadImage('./fondo_me_discord.png');
-  ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#3d405b';  // gris oscuro
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Avatar (circular centrado arriba)
   const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
