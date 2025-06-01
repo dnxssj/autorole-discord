@@ -192,7 +192,7 @@ if (message.content === '!help') {
     return message.reply(pareja ? `💞 Tu pareja es **${pareja.displayName}**.` : '😢 Tu pareja ya no está en el servidor.');
   }
 
-  if (message.content.startsWith('!me')) {
+ if (message.content.startsWith('!me')) {
   const targetUser = message.mentions.users.first() || message.author;
   const member = await message.guild.members.fetch(targetUser.id);
   const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
@@ -211,15 +211,22 @@ if (message.content === '!help') {
   const ctx = canvas.getContext('2d');
 
   // Fondo
-  ctx.fillStyle = '#1e1e2f';
+  ctx.fillStyle = '#ddb892';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Avatar
-  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png', size: 128 }));
-  ctx.drawImage(avatar, 30, 30, 100, 100);
+  try {
+    const avatar = await loadImage(targetUser.displayAvatarURL({ dynamic: false, format: 'png', size: 128 }));
+    ctx.drawImage(avatar, 30, 30, 100, 100);
+  } catch (err) {
+    console.error('❌ Error al cargar el avatar:', err.message);
+    // Opcional: puedes dibujar un rectángulo vacío o un ícono por defecto
+    ctx.fillStyle = '#444';
+    ctx.fillRect(30, 30, 100, 100);
+  }
 
   // Texto
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = '#7f5539';
   ctx.font = 'bold 28px Sans';
   ctx.fillText(`Perfil de ${member.displayName}`, 150, 60);
 
