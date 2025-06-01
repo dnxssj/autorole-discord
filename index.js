@@ -1,7 +1,7 @@
-// Archivo principal reestructurado: index.js
-
 import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
+import { createCanvas, loadImage, registerFont } from 'canvas';
+registerFont('./fonts/Roboto-Bold.ttf', { family: 'Roboto' });
 import dotenv from 'dotenv';
 import fs from 'fs';
 
@@ -193,27 +193,44 @@ if (message.content === '!help') {
   }
 
   if (message.content.startsWith('!me')) {
-    const targetUser = message.mentions.users.first() || message.author;
-    const member = await message.guild.members.fetch(targetUser.id);
-    const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
-    const pareja = parejasData[targetUser.id] ? `<@${parejasData[targetUser.id]}> ❤️` : 'Solter@ 💔';
-    const bff = amistadesData[targetUser.id] ? `<@${amistadesData[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
+  const targetUser = message.mentions.users.first() || message.author;
+  const member = await message.guild.members.fetch(targetUser.id);
+  const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
+  const pareja = parejasData[targetUser.id] ? `<@${parejasData[targetUser.id]}> ❤️` : 'Solter@ 💔';
+  const bff = amistadesData[targetUser.id] ? `<@${amistadesData[targetUser.id]}> 🌟` : 'Sin mejor amig@ 😢';
 
-    const embed = new EmbedBuilder()
-      .setTitle(`✨ Perfil de ${member.displayName}`)
-      .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
-      .setColor(0xd4af37)
-      .addFields(
-        { name: 'Usuario', value: `\`${targetUser.tag}\``, inline: true },
-        { name: 'Nivel / Rango', value: `\`Nivel ${userData.level}\`
-${userData.lastRank || 'Sin rango'}`, inline: true },
-        { name: 'XP', value: `\`${userData.xp} XP\``, inline: true },
-        { name: 'Roles', value: member.roles.cache.filter(r => r.id !== message.guild.id).map(r => `<@&${r.id}>`).join(' • ') || 'Ninguno' },
-        { name: '💘 Estado civil', value: pareja },
-        { name: '🌟 BFF', value: bff, inline: false }
-      );
-    message.reply({ embeds: [embed] });
-  }
+  const canvas = createCanvas(800, 400);
+  const ctx = canvas.getContext('2d');
+
+  // Fondo
+  ctx.fillStyle = '#1e1e2f';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Avatar
+  const avatar = await loadImage(targetUser.displayAvatarURL({ format: 'png' }));
+  ctx.drawImage(avatar, 30, 30, 100, 100);
+
+  // Texto principal
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 28px Sans';
+  ctx.fillText(`Perfil de ${member.displayName}`, 150, 60);
+
+  // Nivel y XP
+  ctx.font = '20px Sans';
+  ctx.fillText(`Nivel: ${userData.level}`, 150, 100);
+  ctx.fillText(`XP: ${userData.xp}`, 150, 130);
+
+  // Estado civil y BFF
+  ctx.fillText(`💘 Estado civil: ${pareja}`, 150, 170);
+  ctx.fillText(`🌟 BFF: ${bff}`, 150, 200);
+
+  // Enviar imagen
+  const buffer = canvas.toBuffer('image/png');
+  message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
+}
+
+
+
 
 if (message.content.startsWith('!marryme')) {
   const target = message.mentions.users.first();
