@@ -205,7 +205,7 @@ if (message.content === '!help') {
     const canvas = createCanvas(600, 600);
     const ctx = canvas.getContext('2d');
 
-    const fondo = await loadImage('./me_background_discord.jps');
+    const fondo = await loadImage('./me_background_discord.jpg');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
     // Avatar con borde blanco
