@@ -1,7 +1,7 @@
 import './keep_alive.js';
 import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import { createCanvas, loadImage, registerFont } from 'canvas';
-registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'RobotoBold' });
+registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'RobotoLight' });
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -193,65 +193,72 @@ if (message.content === '!help') {
     return message.reply(pareja ? `💞 Tu pareja es **${pareja.displayName}**.` : '😢 Tu pareja ya no está en el servidor.');
   }
 
-if (message.content.startsWith('!me')) {
-  const targetUser = message.mentions.users.first() || message.author;
-  const member = await message.guild.members.fetch(targetUser.id);
-  const userData = xpData[targetUser.id] || { xp: 0, level: 0, lastRank: 'Sin rango' };
+  if (message.content.startsWith('!me')) {
+    const userId = message.mentions.users.first()?.id || message.author.id;
+    const user = await message.guild.members.fetch(userId);
+    const avatarURL = user.user.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 });
 
-  const parejaId = parejasData[targetUser.id];
-  const pareja = parejaId
-    ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido'
-    : 'Solter@';
+    const userData = xpData[userId] || { xp: 0, level: 0, lastRank: null };
+    const pareja = 'Lerka'; // ejemplo
+    const bff = 'Nico'; // ejemplo
 
-  const bffId = amistadesData[targetUser.id];
-  const bff = bffId
-    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin mejor amig@'
-    : 'Sin mejor amig@';
+    const canvas = createCanvas(600, 600);
+    const ctx = canvas.getContext('2d');
 
-// Crear canvas
-const canvas = createCanvas(600, 600);
-const ctx = canvas.getContext('2d');
+    const fondo = await loadImage('./34380131_v37-wit-41a-job129.jpg');
+    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-// Fondo plano
-ctx.fillStyle = '#1e1e1e';
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Avatar con borde blanco
+    const avatar = await loadImage(avatarURL);
+    const cx = canvas.width / 2;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, 110, 66, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(cx, 110, 64, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(avatar, cx - 64, 46, 128, 128);
+    ctx.restore();
 
-// Avatar
-const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
-const avatarX = canvas.width / 2 - 64;
-const avatarY = 46;
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
 
-ctx.save(); // Guardamos el contexto antes del clip
-ctx.beginPath();
-ctx.arc(canvas.width / 2, 110, 64, 0, Math.PI * 2, true);
-ctx.closePath();
-ctx.clip();
-ctx.drawImage(avatar, avatarX, avatarY, 128, 128);
-ctx.restore(); // Restauramos el contexto para que no afecte al texto
+    // Nombre
+    ctx.font = 'bold 36px Roboto';
+    ctx.fillText(user.displayName.toUpperCase(), cx, 210);
 
-// Texto
-ctx.fillStyle = '#faf9f7';
-ctx.textAlign = 'center';
+    ctx.font = '22px Roboto';
+    ctx.fillText(`Nivel: ${userData.level}`, cx, 250);
+    ctx.fillText(`XP: ${userData.xp}`, cx, 280);
+    ctx.fillText(`Estado civil: ${pareja}`, cx, 320);
+    ctx.fillText(`Mejor amig@: ${bff}`, cx, 350);
 
-// Nombre
-ctx.font = 'bold 36px sans-serif';
-ctx.fillText(member.displayName.toUpperCase(), canvas.width / 2, 210);
+    // Barra de progreso XP
+    const xp = userData.xp;
+    const level = userData.level;
+    const requiredXp = getRequiredXp(level);
+    const barWidth = 300;
+    const barX = (canvas.width - barWidth) / 2;
+    const barY = 400;
+    const progress = Math.min(xp / requiredXp, 1);
 
-// Coordenadas base
-const x = canvas.width / 2;
-const y = 260;
+    ctx.fillStyle = '#ccc';
+    ctx.fillRect(barX, barY, barWidth, 20);
+    ctx.fillStyle = '#5865f2';
+    ctx.fillRect(barX, barY, barWidth * progress, 20);
+    ctx.strokeStyle = '#000';
+    ctx.strokeRect(barX, barY, barWidth, 20);
 
-ctx.font = '22px sans-serif';
-ctx.fillText(`Nivel: ${userData.level}`, x, y);
-ctx.fillText(`XP: ${userData.xp}`, x, y + 30);
-ctx.fillText(`Estado civil: ${pareja}`, x, y + 70);
-ctx.fillText(`Mejor amig@: ${bff}`, x, y + 100);
+    ctx.font = '16px Roboto';
+    ctx.fillStyle = '#000';
+    ctx.fillText(`${xp} / ${requiredXp}`, canvas.width / 2, barY + 16);
 
-
-  // Enviar imagen
-  const buffer = canvas.toBuffer('image/png');
-  message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
-}
+    const buffer = canvas.toBuffer('image/png');
+    await message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
+  }
 
 
 
