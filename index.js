@@ -52,7 +52,7 @@ client.on('messageCreate', async message => {
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, 110, 66, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#7FB3D5';
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
@@ -74,25 +74,41 @@ client.on('messageCreate', async message => {
     ctx.fillText(`Estado civil: ${pareja}`, cx, 320);
     ctx.fillText(`Mejor amig@: ${bff}`, cx, 350);
 
-    // Barra de progreso XP
-    const xp = userData.xp;
-    const level = userData.level;
-    const requiredXp = getRequiredXp(level);
-    const barWidth = 300;
-    const barX = (canvas.width - barWidth) / 2;
-    const barY = 400;
-    const progress = Math.min(xp / requiredXp, 1);
+// Barra de progreso XP mejorada
+const xp = userData.xp;
+const level = userData.level;
+const requiredXp = getRequiredXp(level);
+const barWidth = 300;
+const barHeight = 24;
+const barX = (canvas.width - barWidth) / 2;
+const barY = 400;
+const progress = Math.min(xp / requiredXp, 1);
 
-    ctx.fillStyle = '#ccc';
-    ctx.fillRect(barX, barY, barWidth, 20);
-    ctx.fillStyle = '#5865f2';
-    ctx.fillRect(barX, barY, barWidth * progress, 20);
-    ctx.strokeStyle = '#000';
-    ctx.strokeRect(barX, barY, barWidth, 20);
+// Fondo de la barra (borde claro)
+ctx.fillStyle = '#ddd';
+ctx.roundRect(barX, barY, barWidth, barHeight, 12);
+ctx.fill();
 
-    ctx.font = '16px Roboto';
-    ctx.fillStyle = '#000';
-    ctx.fillText(`${xp} / ${requiredXp}`, canvas.width / 2, barY + 16);
+// Barra de progreso con degradado
+const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+gradient.addColorStop(0, '#7FB3D5');  // azul claro
+gradient.addColorStop(1, '#4A90E2');  // azul fuerte
+ctx.fillStyle = gradient;
+ctx.roundRect(barX, barY, barWidth * progress, barHeight, 12);
+ctx.fill();
+
+// Borde
+ctx.strokeStyle = '#444';
+ctx.lineWidth = 2;
+ctx.roundRect(barX, barY, barWidth, barHeight, 12);
+ctx.stroke();
+
+// Texto centrado dentro
+ctx.font = '18px Roboto';
+ctx.fillStyle = '#000';
+ctx.textAlign = 'center';
+ctx.fillText(`${xp} / ${requiredXp}`, canvas.width / 2, barY + 17);
+
 
     const buffer = canvas.toBuffer('image/png');
     await message.reply({ files: [{ attachment: buffer, name: 'perfil.png' }] });
