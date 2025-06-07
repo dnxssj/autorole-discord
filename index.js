@@ -10,6 +10,9 @@ registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'lig
 dotenv.config();
 const config = JSON.parse(fs.readFileSync('./config.json'));
 
+const xpFile = './xp.json';
+let xpData = fs.existsSync(xpFile) ? JSON.parse(fs.readFileSync(xpFile)) : {};
+
 const getRequiredXp = lvl => Math.floor(Math.pow((lvl + 1) / 0.1, 2));
 
 const client = new Client({
@@ -40,7 +43,7 @@ client.on('messageCreate', async message => {
     const canvas = createCanvas(600, 600);
     const ctx = canvas.getContext('2d');
 
-    const fondo = await loadImage('./me_background_discord.jpg');
+    const fondo = await loadImage('./34380131_v37-wit-41a-job129.jpg');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
     // Avatar con borde blanco
