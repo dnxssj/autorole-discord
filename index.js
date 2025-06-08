@@ -16,6 +16,8 @@ let parejasData = fs.existsSync(parejasFile) ? JSON.parse(fs.readFileSync(pareja
 const amistadesFile = './amistades.json';
 let amistadesData = fs.existsSync(amistadesFile) ? JSON.parse(fs.readFileSync(amistadesFile)) : {};
 
+const getRequiredXp = lvl => Math.floor(Math.pow((lvl + 1) / 0.1, 2));
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -79,11 +81,10 @@ client.on('messageReactionRemove', async (reaction, user) => {
   if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
 });
 
-// XP & !rank
 client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
+  const authorId = message.author.id;
 
-  const userId = message.author.id;
   if (!xpData[userId]) xpData[userId] = { xp: 0, level: 0, lastRank: null };
   const userXp = xpData[userId];
   userXp.xp += Math.floor(Math.random() * 10) + 5;
@@ -149,7 +150,7 @@ ${progressBar}`, inline: true },
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, 110, 66, 0, Math.PI * 2);
-    ctx.fillStyle = '#7FB3D5';
+    ctx.fillStyle = '#4A90E2';
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
@@ -166,6 +167,8 @@ ${progressBar}`, inline: true },
     ctx.font = '22px Roboto';
     ctx.fillText(`Nivel: ${userData.level}`, cx, 250);
     ctx.fillText(`XP: ${userData.xp}`, cx, 280);
+
+    ctx.font = 'bold 22px Roboto';
     ctx.fillText(`Estado civil: ${pareja}`, cx, 320);
     ctx.fillText(`Mejor amig@: ${bff}`, cx, 350);
 
@@ -177,24 +180,38 @@ ${progressBar}`, inline: true },
     const progress = Math.min(userData.xp / requiredXp, 1);
 
     ctx.fillStyle = '#ddd';
-    ctx.roundRect(barX, barY, barWidth, barHeight, 12);
+    ctx.beginPath();
+    ctx.moveTo(barX + 12, barY);
+    ctx.lineTo(barX + barWidth - 12, barY);
+    ctx.quadraticCurveTo(barX + barWidth, barY, barX + barWidth, barY + 12);
+    ctx.lineTo(barX + barWidth, barY + barHeight - 12);
+    ctx.quadraticCurveTo(barX + barWidth, barY + barHeight, barX + barWidth - 12, barY + barHeight);
+    ctx.lineTo(barX + 12, barY + barHeight);
+    ctx.quadraticCurveTo(barX, barY + barHeight, barX, barY + barHeight - 12);
+    ctx.lineTo(barX, barY + 12);
+    ctx.quadraticCurveTo(barX, barY, barX + 12, barY);
+    ctx.closePath();
     ctx.fill();
 
     const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
     gradient.addColorStop(0, '#7FB3D5');
     gradient.addColorStop(1, '#4A90E2');
     ctx.fillStyle = gradient;
-    ctx.roundRect(barX, barY, barWidth * progress, barHeight, 12);
+    ctx.beginPath();
+    ctx.moveTo(barX + 12, barY);
+    ctx.lineTo(barX + barWidth * progress - 12, barY);
+    ctx.quadraticCurveTo(barX + barWidth * progress, barY, barX + barWidth * progress, barY + 12);
+    ctx.lineTo(barX + barWidth * progress, barY + barHeight - 12);
+    ctx.quadraticCurveTo(barX + barWidth * progress, barY + barHeight, barX + barWidth * progress - 12, barY + barHeight);
+    ctx.lineTo(barX + 12, barY + barHeight);
+    ctx.quadraticCurveTo(barX, barY + barHeight, barX, barY + barHeight - 12);
+    ctx.lineTo(barX, barY + 12);
+    ctx.quadraticCurveTo(barX, barY, barX + 12, barY);
+    ctx.closePath();
     ctx.fill();
-
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 2;
-    ctx.roundRect(barX, barY, barWidth, barHeight, 12);
-    ctx.stroke();
 
     ctx.font = '18px Roboto';
     ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
     ctx.fillText(`${userData.xp} / ${requiredXp}`, canvas.width / 2, barY + 17);
 
     const buffer = canvas.toBuffer('image/png');
