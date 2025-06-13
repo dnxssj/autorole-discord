@@ -85,6 +85,7 @@ client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
   const authorId = message.author.id;
 
+  if (message.content.startsWith('!')) return;
   if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
   const userXp = xpData[authorId];
 
@@ -127,11 +128,39 @@ if (message.content === '!help') {
       { name: '!relacion', value: 'Muestra tu pareja actual (si tienes).' },
       { name: '!marryme @usuario', value: 'Envía una propuesta de pareja al usuario mencionado.' },
       { name: '!divorce', value: 'Solicita el divorcio de tu pareja actual (requiere confirmación).' },
-      { name: '!bffme @usuario', value: 'Pide ser mejor amig@ de alguien (requiere confirmación).' }
+      { name: '!bffme @usuario', value: 'Pide ser mejor amig@ de alguien (requiere confirmación).' },
+      { name: '!booster', value:'Despliega un pequeño mensaje de agradecimiento por tu compromiso con el server'},
+      { name: '!claim', value: 'Funcional cada 24h, recoge XP extra!'}
     )
     .setColor(0x7289da);
 
   message.reply({ embeds: [helpEmbed] });
+}
+
+  if (message.content === '!backup') {
+  const allowedIds = [process.env.ADMIN_ID_1, process.env.ADMIN_ID_2];
+  if (!allowedIds.includes(authorId)) {
+    return message.reply('🚫 Este comando es solo para administradores autorizados.');
+  }
+
+  const archivos = ['xp.json', 'parejas.json', 'amistades.json', 'claimCooldowns.json'].filter(file =>
+    fs.existsSync(`./${file}`)
+  );
+
+  if (archivos.length === 0) return message.reply('📁 No hay archivos para respaldar.');
+
+  try {
+    await message.author.send({
+      content: '📦 Aquí tienes los archivos de backup actuales:',
+      files: archivos.map(file => ({
+        attachment: `./${file}`,
+        name: file
+      }))
+    });
+    message.reply('✅ Backup enviado por mensaje privado.');
+  } catch (error) {
+    message.reply('❌ No pude enviarte el mensaje privado. ¿Tienes los DMs desactivados?');
+  }
 }
 
   
@@ -186,7 +215,7 @@ ${progressBar}`, inline: true },
     let displayName = member.displayName.toUpperCase();
     const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
     if (boosterRole && member.roles.cache.has(boosterRole.id)) {
-      displayName = `⭐ ${displayName} ⭐`;
+      displayName = `★ ${displayName} ★`;
     }
     ctx.fillText(displayName, cx, 210);
 
@@ -379,7 +408,7 @@ if (message.content === '!claim') {
     return message.reply(`⏳ Ya has reclamado tu recompensa. Inténtalo de nuevo en **${timeLeft}h**.`);
   }
 
-  const rewardXp = Math.floor(Math.random() * 100) + 50;
+  const rewardXp = 650;
   if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
   xpData[authorId].xp += rewardXp;
   cooldowns[authorId] = now;
