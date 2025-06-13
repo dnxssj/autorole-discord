@@ -114,6 +114,26 @@ client.on('messageCreate', async message => {
   }
   fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
 
+  // Comando !help
+if (message.content === '!help') {
+  const helpEmbed = new EmbedBuilder()
+    .setTitle('📜 Lista de Comandos')
+    .setDescription('Aquí tienes los comandos disponibles:')
+    .addFields(
+      { name: '!help', value: 'Muestra esta lista de comandos.' },
+      { name: '!rank [@usuario]', value: 'Muestra el nivel y progreso de XP del usuario.' },
+      { name: '!me', value: 'Muestra una imagen de tu perfil con nivel, XP, pareja y mejor amig@.' },
+      { name: '!relacion', value: 'Muestra tu pareja actual (si tienes).' },
+      { name: '!marryme @usuario', value: 'Envía una propuesta de pareja al usuario mencionado.' },
+      { name: '!divorce', value: 'Solicita el divorcio de tu pareja actual (requiere confirmación).' },
+      { name: '!bffme @usuario', value: 'Pide ser mejor amig@ de alguien (requiere confirmación).' }
+    )
+    .setColor(0x7289da);
+
+  message.reply({ embeds: [helpEmbed] });
+}
+
+  
   if (message.content.startsWith('!rank')) {
     const target = message.mentions.users.first() || message.author;
     const member = await message.guild.members.fetch(target.id);
@@ -162,7 +182,13 @@ ${progressBar}`, inline: true },
     ctx.fillStyle = '#000';
     ctx.textAlign = 'center';
     ctx.font = 'bold 36px Roboto';
-    ctx.fillText(member.displayName.toUpperCase(), cx, 210);
+    let displayName = member.displayName.toUpperCase();
+    const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
+    if (boosterRole && member.roles.cache.has(boosterRole.id)) {
+      displayName = `⭐ ${displayName} ⭐`;
+    }
+    ctx.fillText(displayName, cx, 210);
+
 
     ctx.font = '22px Roboto';
     ctx.fillText(`Nivel: ${userData.level}`, cx, 250);
@@ -318,23 +344,54 @@ ${progressBar}`, inline: true },
     }).catch(() => message.channel.send('⏰ Tiempo agotado, no se ha confirmado la amistad.'));
   }
 
-  if (message.content === '!murcia') {
-    const chistes = [
-      '¿Por qué en Murcia no usan GPS? Porque todos los caminos llevan a una huerta.',
-      '? qué es Murcia?',
-      'Murcia no existe, chaval',
-      'No me sé chistes sobre desiertos',
-      '¿Cómo se llama un murciano sin acento? ¡Turista!',
-      '—Oye Paco, ¿y esa camisa tan chula? —Es de Huertza Prímavhera, la tienda más fashion de Murcia.',
-      'En Murcia no llueve, el cielo solo riega las lechugas.',
-      'Dicen que en Murcia las verduras se asustan cuando oyen “gazpacho”.',
-      '¿Sabes cómo se dice “wifi” en Murcia? Guifí, primo.',
-      '¿Por qué en Murcia no hacen películas de miedo? Porque ya tienen el calor de agosto.',
-      '¿Cómo se saluda un murciano elegante? ¡Muy güeno todo, señó!'
-    ];
-    const random = Math.floor(Math.random() * chistes.length);
-    await message.reply(chistes[random]);
+  //For boosters only
+  if (message.content === '!booster') {
+  const boosterRole = message.guild.roles.cache.find(role => role.name.toLowerCase().includes('booster'));
+  if (!boosterRole || !message.member.roles.cache.has(boosterRole.id)) {
+    return message.reply('🚫 Este comando es solo para boosters del servidor.');
   }
+
+  const embed = new EmbedBuilder()
+    .setTitle('🚀 ¡Gracias por boostear el servidor!')
+    .setDescription('Como agradecimiento, puedes usar `!claim` una vez cada 24 horas para recibir XP extra 💎')
+    .setColor(0xff73fa)
+    .setThumbnail('https://media.tenor.com/_4YgA77ExHEAAAAC/thank-you.gif');
+
+  return message.reply({ embeds: [embed] });
+}
+
+const claimCooldown = './claimCooldowns.json';
+let cooldowns = fs.existsSync(claimCooldown) ? JSON.parse(fs.readFileSync(claimCooldown)) : {};
+
+if (message.content === '!claim') {
+  const boosterRole = message.guild.roles.cache.find(role => role.name.toLowerCase().includes('booster'));
+  if (!boosterRole || !message.member.roles.cache.has(boosterRole.id)) {
+    return message.reply('🚫 Este comando solo está disponible para boosters.');
+  }
+
+  const now = Date.now();
+  const lastClaim = cooldowns[authorId] || 0;
+  const twentyFourHours = 24 * 60 * 60 * 1000;
+
+  if (now - lastClaim < twentyFourHours) {
+    const timeLeft = Math.ceil((twentyFourHours - (now - lastClaim)) / (60 * 60 * 1000));
+    return message.reply(`⏳ Ya has reclamado tu recompensa. Inténtalo de nuevo en **${timeLeft}h**.`);
+  }
+
+  const rewardXp = Math.floor(Math.random() * 100) + 50;
+  if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
+  xpData[authorId].xp += rewardXp;
+  cooldowns[authorId] = now;
+
+  fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
+  fs.writeFileSync(claimCooldown, JSON.stringify(cooldowns, null, 2));
+
+  return message.reply(`🎉 Has reclamado **${rewardXp} XP** como booster. ¡Gracias por apoyar el servidor!`);
+}
+
+
+
+  
 });
 
 client.login(process.env.TOKEN);
