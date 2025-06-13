@@ -85,8 +85,9 @@ client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
   const authorId = message.author.id;
 
-  if (!xpData[userId]) xpData[userId] = { xp: 0, level: 0, lastRank: null };
-  const userXp = xpData[userId];
+  if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
+  const userXp = xpData[authorId];
+
   userXp.xp += Math.floor(Math.random() * 10) + 5;
 
   const level = Math.floor(0.1 * Math.sqrt(userXp.xp));
