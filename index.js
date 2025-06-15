@@ -218,9 +218,6 @@ ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
   const cx = canvas.width / 2;
 
   if (isBooster) {
-    const marco = await loadImage('./booster_frame.png');
-    ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
-
     const insignia = await loadImage('./booster_badge.png');
     ctx.drawImage(insignia, cx + 40, 100, 32, 32);
   }
