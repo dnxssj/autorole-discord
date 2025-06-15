@@ -227,26 +227,13 @@ ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
   ctx.save();
   ctx.beginPath();
+  let borderColor = '#4A90E2'; // normal
+  if (vipRole && member.roles.cache.has(vipRole.id)) borderColor = '#FFD700';
+  else if (isBooster) borderColor = '#AC87FF';
+
   ctx.arc(cx, 110, 66, 0, Math.PI * 2);
-let borderColor, xpBarBg, gradientStart, gradientEnd;
-
-if (vipRole && member.roles.cache.has(vipRole.id)) {
-  borderColor = '#FFD700';
-  xpBarBg = '#fff1b8';
-  gradientStart = '#ffd700';
-  gradientEnd = '#ffae00';
-} else if (isBooster) {
-  borderColor = '#7FB3D5';
-  xpBarBg = '#d7f0ff';
-  gradientStart = '#7FB3D5';
-  gradientEnd = '#4A90E2';
-} else {
-  borderColor = '#4A90E2';
-  xpBarBg = '#ddd';
-  gradientStart = '#7FB3D5';
-  gradientEnd = '#4A90E2';
-}
-
+  ctx.fillStyle = borderColor;
+  ctx.fill();
   ctx.closePath();
   ctx.beginPath();
   ctx.arc(cx, 110, 64, 0, Math.PI * 2);
@@ -254,7 +241,7 @@ if (vipRole && member.roles.cache.has(vipRole.id)) {
   ctx.drawImage(avatar, cx - 64, 46, 128, 128);
   ctx.restore();
 
-  ctx.fillStyle = borderColor;
+  ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 36px Roboto';
   let displayName = member.displayName.toUpperCase();
@@ -277,7 +264,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   const barX = (canvas.width - barWidth) / 2;
   const barY = 400;
 
-  ctx.fillStyle = xpBarBg;
+  ctx.fillStyle = '#ddd';
   ctx.beginPath();
   ctx.moveTo(barX + 12, barY);
   ctx.lineTo(barX + barWidth - 12, barY);
@@ -291,11 +278,23 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   ctx.closePath();
   ctx.fill();
 
-  const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
-  gradient.addColorStop(0, gradientStart);
-  gradient.addColorStop(1, gradientEnd);
-  ctx.fillStyle = gradient;
+  let barStartColor = '#7FB3D5'; // default (normal)
+  let barEndColor = '#4A90E2';   // default (normal)
 
+  if (vipRole && member.roles.cache.has(vipRole.id)) {
+    barStartColor = '#FFD700';
+    barEndColor = '#FFC107';
+  } else if (isBooster) {
+    barStartColor = '#AC87FF';
+    barEndColor = '#7C4DFF';
+  }
+ 
+  const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+  gradient.addColorStop(0, barStartColor);
+  gradient.addColorStop(1, barEndColor);
+
+
+  ctx.fillStyle = gradient;
   ctx.beginPath();
   ctx.moveTo(barX + 12, barY);
   ctx.lineTo(barX + barWidth * progress - 12, barY);
