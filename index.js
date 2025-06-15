@@ -198,16 +198,40 @@ if (message.content.startsWith('!me')) {
   const canvas = createCanvas(600, 600);
   const ctx = canvas.getContext('2d');
 
-  const fondo = await loadImage('./me_background_discord.jpg');
-  ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+  //Booster
+  const vipRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('vip'));
+  const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
+  const isBooster = boosterRole && member.roles.cache.has(boosterRole.id) && !(vipRole && member.roles.cache.has(vipRole.id));
+
+
+  let fondo;
+  if (vipRole && member.roles.cache.has(vipRole.id)) {
+    fondo = await loadImage('./me_background_vip_discord.png');
+  } else if (isBooster) {
+    fondo = await loadImage('./me_background_booster_discord.png');
+  } else {
+    fondo = await loadImage('./me_background_discord.jpg');
+  }
+
+ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+  const cx = canvas.width / 2;
+
+  if (isBooster) {
+    const marco = await loadImage('./booster_frame.png');
+    ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
+
+    const insignia = await loadImage('./booster_badge.png');
+    ctx.drawImage(insignia, cx + 40, 100, 32, 32);
+  }
 
   const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
-  const cx = canvas.width / 2;
+
 
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, 110, 66, 0, Math.PI * 2);
-  ctx.fillStyle = '#4A90E2';
+  ctx.fillStyle = vipRole && member.roles.cache.has(vipRole.id) ? '#FFD700' : isBooster ? '#7FB3D5' : '#4A90E2';
   ctx.fill();
   ctx.closePath();
   ctx.beginPath();
@@ -220,10 +244,10 @@ if (message.content.startsWith('!me')) {
   ctx.textAlign = 'center';
   ctx.font = 'bold 36px Roboto';
   let displayName = member.displayName.toUpperCase();
-  const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
-  if (boosterRole && member.roles.cache.has(boosterRole.id)) {
-    displayName = `★ ${displayName} ★`;
-  }
+if (boosterRole && member.roles.cache.has(boosterRole.id)) {
+  displayName = `★ ${displayName} ★`;
+}
+
   ctx.fillText(displayName, cx, 210);
 
   ctx.font = '22px Roboto';
@@ -476,7 +500,7 @@ if (message.content.startsWith('!me')) {
       return message.reply('🕒 Ya has reclamado tu XP extra hoy. Intenta mañana.');
     }
 
-    const xpAmount = 50;
+    const xpAmount = 150;
     userData.xp += xpAmount;
     userData.lastClaim = now;
     fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
