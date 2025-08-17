@@ -1,6 +1,6 @@
 {
-  "guildId": "1377648674187776040",
-  "channelId": "1377657117695152209",
+  "guildId": "635059261298311179",
+  "channelId": "1406645622013952100",
   "colorRoles": {
     "🔴": "rojo_coral",
     "🟠": "naranja_dorado",
@@ -12,6 +12,6 @@
     "🤍": "blanco",
     "🟡": "amarillo_crema"
   },
-  "colorMessageId": "1378359034645581825",
+  "colorMessageId": "",
   "levelUpChannelId": "1378353635947184228"
 }

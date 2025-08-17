@@ -35,8 +35,7 @@ client.once('ready', async () => {
 
   const activities = [
     { name: 'cómo el churumbel se jode el hombro', type: 3 },
-    { name: 'con tus emociones', type: 0 },
-    { name: 'murcianadas 🫠', type: 2 }
+    { name: 'con tus emociones', type: 0 }
   ];
   let i = 0;
   client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
@@ -112,7 +111,7 @@ client.on('messageCreate', async message => {
 
   ⚙️ *Algunos comandos solo están disponibles si tienes ciertos roles.*
       `)
-      .setFooter({ text: 'Dexter Bot • por DNX' });
+      .setFooter({ text: 'Kaneki Bot • por DNX' });
 
     message.channel.send({ embeds: [embed] });
   }
@@ -256,7 +255,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   ctx.fillText(`XP: ${userData.xp}`, cx, 280);
 
   ctx.font = 'bold 22px Roboto';
-  ctx.fillText(`Estado civil: ${pareja}`, cx, 320);
+  ctx.fillText(`Relación: ${pareja}`, cx, 320);
   ctx.fillText(`Mejor amig@: ${bff}`, cx, 350);
 
   const barWidth = 300;
@@ -336,7 +335,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
     .setColor(0xff69b4)
     .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
     .addFields(
-      { name: 'Estado civil', value: parejaName, inline: true },
+      { name: 'Relación', value: parejaName, inline: true },
       { name: 'Mejor amig@', value: bffName, inline: true }
     )
     .setFooter({ text: '¡Qué bonito! 🌸' });
