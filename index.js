@@ -29,6 +29,16 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
+ /* Grupos de colores
+  const colorGroups = {
+    reds: config.colorRoles.reds,
+    greens: config.colorRoles.greens,
+    blues: config.colorRoles.blues,
+    yellows: config.colorRoles.yellows,
+    purples: config.colorRoles.purples,
+    bw: config.colorRoles.bw
+  };
+
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
 
@@ -47,15 +57,7 @@ client.once('ready', async () => {
   const colorChannel = await client.channels.fetch(config.channelId);
   const zodiacChannel = await client.channels.fetch(config.zodiacChannelId);
 
-  // Grupos de colores
-  const colorGroups = {
-    reds: config.colorRoles.reds,
-    greens: config.colorRoles.greens,
-    blues: config.colorRoles.blues,
-    yellows: config.colorRoles.yellows,
-    purples: config.colorRoles.purples,
-    bw: config.colorRoles.bw
-  };
+
 
   // Enviar embeds de colores si no existen
   for (const [groupName, colors] of Object.entries(colorGroups)) {
@@ -155,8 +157,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
     const roleName = config.zodiacRoles[reaction.emoji.name];
     const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
     if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
-  }
-});
+  } 
+}); */
 
 client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;

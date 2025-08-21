@@ -50,13 +50,13 @@
     "♓": "Piscis"
   },
 
-  "redsMessageId": "",
-  "greensMessageId": "",
-  "bluesMessageId": "",
-  "yellowsMessageId": "",
-  "purplesMessageId": "",
-  "bwMessageId": "",
-  "zodiacMessageId": "",
+  "redsMessageId": "1408090274562838568",
+  "greensMessageId": "1408090282720886814",
+  "bluesMessageId": "1408090289347756052",
+  "yellowsMessageId": "1408090296209772785",
+  "purplesMessageId": "1408090303835148318",
+  "bwMessageId": "1408090312580272189",
+  "zodiacMessageId": "1408090319479771319",
 
   "levelUpChannelId": "635059262002823169"
 }
