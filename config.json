@@ -2,20 +2,37 @@
   "guildId": "635059261298311179",
   "channelId": "1406645622013952100",
 
-  "warmColors": {
-    "🔴": "rojo_coral",
-    "🟠": "naranja_dorado",
-    "🟡": "amarillo_crema"
-  },
-  "coolColors": {
-    "🔵": "celeste_pastel",
-    "🟣": "lila_vibrante",
-    "🟢": "verde_menta"
-  },
-  "neutralColors": {
-    "⚫": "gris_carbon",
-    "🤍": "blanco",
-    "🌸": "rosa_pastel"
+  "colorRoles": {
+    "reds": {
+      "🔴": { "name": "rojo_oscuro", "hex": "800e13" },
+      "🟥": { "name": "rojo_fuego", "hex": "da1e37" },
+      "🩷": { "name": "rojo_coral", "hex": "fcb9b2" }
+    },
+    "greens": {
+      "🟢": { "name": "verde_menta", "hex": "a5ffd6" },
+      "🌿": { "name": "verde_selva", "hex": "b2ff9e" },
+      "🟩": { "name": "verde_bosque", "hex": "3ba342" }
+    },
+    "blues": {
+      "🔵": { "name": "azul_medianoche", "hex": "0b2545" },
+      "🟦": { "name": "azul_cielo", "hex": "4492ce" },
+      "💙": { "name": "azul_océano", "hex": "1b7ddf" }
+    },
+    "yellows": {
+      "🟡": { "name": "amarillo_oro", "hex": "f9c80e" },
+      "🌕": { "name": "amarillo_sol", "hex": "ffbc42" },
+      "🟨": { "name": "amarillo_miel", "hex": "ffcb69" }
+    },
+    "purples": {
+      "🟣": { "name": "violeta_nocturno", "hex": "662e9b" },
+      "🟪": { "name": "violeta_lavanda", "hex": "b298dc" },
+      "💜": { "name": "violeta_malva", "hex": "dbcdf0" }
+    },
+    "bw": {
+      "⚪": { "name": "blanco_nieve", "hex": "fff1e6" },
+      "⬜": { "name": "blanco_marfil", "hex": "e7e1ca" },
+      "⚫": { "name": "negro_medianoche", "hex": "202020" }
+    }
   },
   "zodiacRoles": {
     "♈": "Aries",

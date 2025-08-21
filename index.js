@@ -32,6 +32,7 @@ const client = new Client({
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
 
+  // Cambiar presencia
   const activities = [
     { name: 'cómo el churumbel se jode el hombro', type: 3 },
     { name: 'con tus emociones', type: 0 }
@@ -41,120 +42,73 @@ client.once('ready', async () => {
   setInterval(() => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   }, 1800000); // 30 minutos
+
+const colorGroups = {
+  reds: config.colorRoles.reds,
+  greens: config.colorRoles.greens,
+  blues: config.colorRoles.blues,
+  yellows: config.colorRoles.yellows,
+  purples: config.colorRoles.purples,
+  bw: config.colorRoles.bw
+};
+
+for (const [groupName, colors] of Object.entries(colorGroups)) {
+  // Si no hay mensaje enviado aún
+  if (!config[`${groupName}MessageId`]) {
+    const embed = new EmbedBuilder()
+      .setTitle(`🎨 ${groupName.toUpperCase()} – Selección Actual`)
+      .setDescription(
+        Object.entries(colors)
+          .map(([emoji, info]) => `${emoji} → ${info.name}`)
+          .join('\n')
+      )
+      // Usamos el primer color como color del embed
+      .setColor(Number(`0x${Object.values(colors)[0].hex}`));
+
+    const msg = await channel.send({ embeds: [embed] });
+
+    for (const emoji of Object.keys(colors)) await msg.react(emoji);
+
+    // Guardamos messageId en config
+    config[`${groupName}MessageId`] = msg.id;
+    fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
+  }
+}
+
+// Asignar roles por reacción
+client.on('messageReactionAdd', async (reaction, user) => {
+  if (user.bot || !reaction.message.guild) return;
+  const member = await reaction.message.guild.members.fetch(user.id);
+
+  for (const [groupName, colors] of Object.entries(colorGroups)) {
+    if (reaction.message.id === config[`${groupName}MessageId`]) {
+      const roleName = colors[reaction.emoji.name]?.name;
+      const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
+      if (!role) return;
+
+      // Quitar roles anteriores de este grupo
+      for (const info of Object.values(colors)) {
+        const r = reaction.message.guild.roles.cache.find(ro => ro.name === info.name);
+        if (r && member.roles.cache.has(r.id)) await member.roles.remove(r).catch(console.error);
+      }
+
+      await member.roles.add(role).catch(console.error);
+    }
+  }
+})
+
 });
 
-client.on("messageReactionAdd", async (reaction, user) => {
-  if (user.bot) return;
-  if (reaction.partial) {
-    try { await reaction.fetch(); } 
-    catch (err) { console.error("Error al obtener reacción:", err); return; }
-  }
-  const guild = reaction.message.guild;
-  if (!guild) return;
+// Quitar roles al remover reacción
+client.on('messageReactionRemove', async (reaction, user) => {
+  if (user.bot || !reaction.message.guild) return;
+  const member = await reaction.message.guild.members.fetch(user.id);
 
-  // ----- Colores cálidos -----
-  if (reaction.message.id === config.warmColorsMessageId) {
-    const roleName = config.warmColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.add(role);
-      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
-    }
-  }
-
-  // ----- Colores fríos -----
-  if (reaction.message.id === config.coolColorsMessageId) {
-    const roleName = config.coolColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.add(role);
-      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
-    }
-  }
-
-  // ----- Colores neutros -----
-  if (reaction.message.id === config.neutralColorsMessageId) {
-    const roleName = config.neutralColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.add(role);
-      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
-    }
-  }
-
-  // ----- Zodiaco -----
-  if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = config.zodiacRoles[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.add(role);
-      console.log(`🌌 Rol de zodiaco ${roleName} asignado a ${user.tag}`);
-    }
-  }
-});
-
-client.on("messageReactionRemove", async (reaction, user) => {
-  if (user.bot) return;
-  if (reaction.partial) {
-    try { await reaction.fetch(); } 
-    catch (err) { console.error("Error al obtener reacción:", err); return; }
-  }
-  const guild = reaction.message.guild;
-  if (!guild) return;
-
-  // ----- Colores cálidos -----
-  if (reaction.message.id === config.warmColorsMessageId) {
-    const roleName = config.warmColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.remove(role);
-      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
-    }
-  }
-
-  // ----- Colores fríos -----
-  if (reaction.message.id === config.coolColorsMessageId) {
-    const roleName = config.coolColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.remove(role);
-      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
-    }
-  }
-
-  // ----- Colores neutros -----
-  if (reaction.message.id === config.neutralColorsMessageId) {
-    const roleName = config.neutralColors[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.remove(role);
-      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
-    }
-  }
-
-  // ----- Zodiaco -----
-  if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = config.zodiacRoles[reaction.emoji.name];
-    if (!roleName) return;
-    const role = guild.roles.cache.find(r => r.name === roleName);
-    const member = guild.members.cache.get(user.id);
-    if (role && member) {
-      await member.roles.remove(role);
-      console.log(`🌌 Rol de zodiaco ${roleName} removido de ${user.tag}`);
+  for (const [groupName, colors] of Object.entries(colorGroups)) {
+    if (reaction.message.id === config[`${groupName}MessageId`]) {
+      const roleName = colors[reaction.emoji.name]?.name;
+      const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
+      if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
     }
   }
 });
