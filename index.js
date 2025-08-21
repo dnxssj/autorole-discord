@@ -70,7 +70,7 @@ for (const [groupName, colors] of Object.entries(colorGroups)) {
       // Usamos el primer color como color del embed
       .setColor(Number(`0x${Object.values(colors)[0].hex}`));
 
-    const msg = await colorchannel.send({ embeds: [embed] });
+    const msg = await colorChannel.send({ embeds: [embed] });
 
     for (const emoji of Object.keys(colors)) await msg.react(emoji);
 
