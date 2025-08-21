@@ -1,6 +1,7 @@
 {
   "guildId": "635059261298311179",
   "channelId": "1406645622013952100",
+  "zodiacChannelId": "1406645622013952100",
 
   "colorRoles": {
     "reds": {
@@ -49,9 +50,12 @@
     "♓": "Piscis"
   },
 
-  "warmColorsMessageId": "",
-  "coolColorsMessageId": "",
-  "neutralColorsMessageId": "",
+  "redsMessageId": "",
+  "greensMessageId": "",
+  "bluesMessageId": "",
+  "yellowsMessageId": "",
+  "purplesMessageId": "",
+  "bwMessageId": "",
   "zodiacMessageId": "",
 
   "levelUpChannelId": "635059262002823169"
