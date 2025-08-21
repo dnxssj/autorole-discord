@@ -1,17 +1,41 @@
 {
   "guildId": "635059261298311179",
   "channelId": "1406645622013952100",
-  "colorRoles": {
+
+  "warmColors": {
     "🔴": "rojo_coral",
     "🟠": "naranja_dorado",
-    "🟣": "lila_vibrante",
-    "🔵": "celeste_pastel",
-    "🟢": "verde_menta",
-    "🌸": "rosa_pastel",
-    "⚫": "gris_carbon",
-    "🤍": "blanco",
     "🟡": "amarillo_crema"
   },
-  "colorMessageId": "1406657160137539698",
+  "coolColors": {
+    "🔵": "celeste_pastel",
+    "🟣": "lila_vibrante",
+    "🟢": "verde_menta"
+  },
+  "neutralColors": {
+    "⚫": "gris_carbon",
+    "🤍": "blanco",
+    "🌸": "rosa_pastel"
+  },
+  "zodiacRoles": {
+    "♈": "Aries",
+    "♉": "Tauro",
+    "♊": "Géminis",
+    "♋": "Cáncer",
+    "♌": "Leo",
+    "♍": "Virgo",
+    "♎": "Libra",
+    "♏": "Escorpio",
+    "♐": "Sagitario",
+    "♑": "Capricornio",
+    "♒": "Acuario",
+    "♓": "Piscis"
+  },
+
+  "warmColorsMessageId": "",
+  "coolColorsMessageId": "",
+  "neutralColorsMessageId": "",
+  "zodiacMessageId": "",
+
   "levelUpChannelId": "635059262002823169"
 }

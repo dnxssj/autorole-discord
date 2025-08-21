@@ -29,26 +29,8 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
-// Diccionario zodiacal
-const zodiacRoles = {
-  "♈": "Aries",
-  "♉": "Tauro",
-  "♊": "Géminis",
-  "♋": "Cáncer",
-  "♌": "Leo",
-  "♍": "Virgo",
-  "♎": "Libra",
-  "♏": "Escorpio",
-  "♐": "Sagitario",
-  "♑": "Capricornio",
-  "♒": "Acuario",
-  "♓": "Piscis"
-};
-
-
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
-  const channel = await client.channels.fetch(config.channelId);
 
   const activities = [
     { name: 'cómo el churumbel se jode el hombro', type: 3 },
@@ -58,86 +40,122 @@ client.once('ready', async () => {
   client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   setInterval(() => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
-  }, 1800000);
+  }, 1800000); // 30 minutos
+});
 
-   // 🎨 Embed de Colores
-  if (!config.colorMessageId) {
-    const embed = new EmbedBuilder()
-      .setTitle('🎨 Colores de Nickname – Selección Actual')
-      .setDescription(Object.entries(config.colorRoles).map(([emoji, role]) => `${emoji} → ${role}`).join('\n'))
-      .setColor(0x9b59b6);
+client.on("messageReactionAdd", async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) {
+    try { await reaction.fetch(); } 
+    catch (err) { console.error("Error al obtener reacción:", err); return; }
+  }
+  const guild = reaction.message.guild;
+  if (!guild) return;
 
-    const msg = await channel.send({ embeds: [embed] });
-    for (const emoji of Object.keys(config.colorRoles)) await msg.react(emoji);
-    config.colorMessageId = msg.id;
-    fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
+  // ----- Colores cálidos -----
+  if (reaction.message.id === config.warmColorsMessageId) {
+    const roleName = config.warmColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.add(role);
+      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
+    }
   }
 
-  // ♈ Embed de Zodiaco
-  if (!config.zodiacMessageId) {
-    const zodiacEmbed = new EmbedBuilder()
-      .setTitle('♈ Roles Zodiacales')
-      .setDescription(Object.entries(zodiacRoles).map(([emoji, role]) => `${emoji} → ${role}`).join('\n'))
-      .setColor(0xe67e22);
+  // ----- Colores fríos -----
+  if (reaction.message.id === config.coolColorsMessageId) {
+    const roleName = config.coolColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.add(role);
+      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
+    }
+  }
 
-    const zMsg = await channel.send({ embeds: [zodiacEmbed] });
-    for (const emoji of Object.keys(zodiacRoles)) await zMsg.react(emoji);
-    config.zodiacMessageId = zMsg.id;
-    fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
+  // ----- Colores neutros -----
+  if (reaction.message.id === config.neutralColorsMessageId) {
+    const roleName = config.neutralColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.add(role);
+      console.log(`✅ Rol ${roleName} asignado a ${user.tag}`);
+    }
+  }
+
+  // ----- Zodiaco -----
+  if (reaction.message.id === config.zodiacMessageId) {
+    const roleName = config.zodiacRoles[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.add(role);
+      console.log(`🌌 Rol de zodiaco ${roleName} asignado a ${user.tag}`);
+    }
   }
 });
 
-// Asignar roles por reacciones
-client.on('messageReactionAdd', async (reaction, user) => {
-  if (user.bot || !reaction.message.guild) return;
-  const member = await reaction.message.guild.members.fetch(user.id);
+client.on("messageReactionRemove", async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) {
+    try { await reaction.fetch(); } 
+    catch (err) { console.error("Error al obtener reacción:", err); return; }
+  }
+  const guild = reaction.message.guild;
+  if (!guild) return;
 
-  // Colores
-  if (reaction.message.id === config.colorMessageId) {
-    const roleName = config.colorRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (!role) return;
-
-    // quitar roles de color anteriores
-    for (const name of Object.values(config.colorRoles)) {
-      const r = reaction.message.guild.roles.cache.find(ro => ro.name === name);
-      if (r && member.roles.cache.has(r.id)) await member.roles.remove(r);
+  // ----- Colores cálidos -----
+  if (reaction.message.id === config.warmColorsMessageId) {
+    const roleName = config.warmColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.remove(role);
+      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
     }
-    await member.roles.add(role).catch(console.error);
   }
 
-  // Zodiaco
-  if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = zodiacRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (!role) return;
-
-    // quitar roles zodiacales anteriores
-    for (const name of Object.values(zodiacRoles)) {
-      const r = reaction.message.guild.roles.cache.find(ro => ro.name === name);
-      if (r && member.roles.cache.has(r.id)) await member.roles.remove(r);
+  // ----- Colores fríos -----
+  if (reaction.message.id === config.coolColorsMessageId) {
+    const roleName = config.coolColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.remove(role);
+      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
     }
-    await member.roles.add(role).catch(console.error);
-  }
-});
-
-// Quitar roles cuando quitan la reacción
-client.on('messageReactionRemove', async (reaction, user) => {
-  if (user.bot || !reaction.message.guild) return;
-  const member = await reaction.message.guild.members.fetch(user.id);
-
-  // Colores
-  if (reaction.message.id === config.colorMessageId) {
-    const roleName = config.colorRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
   }
 
-  // Zodiaco
+  // ----- Colores neutros -----
+  if (reaction.message.id === config.neutralColorsMessageId) {
+    const roleName = config.neutralColors[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.remove(role);
+      console.log(`❌ Rol ${roleName} removido de ${user.tag}`);
+    }
+  }
+
+  // ----- Zodiaco -----
   if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = zodiacRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
+    const roleName = config.zodiacRoles[reaction.emoji.name];
+    if (!roleName) return;
+    const role = guild.roles.cache.find(r => r.name === roleName);
+    const member = guild.members.cache.get(user.id);
+    if (role && member) {
+      await member.roles.remove(role);
+      console.log(`🌌 Rol de zodiaco ${roleName} removido de ${user.tag}`);
+    }
   }
 });
 

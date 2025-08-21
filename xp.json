@@ -1,32 +1,32 @@
 {
   "746490484595097630": {
-    "xp": 4598,
+    "xp": 4684,
     "level": 6,
     "lastRank": null,
     "lastClaim": "Wed Aug 20 2025"
   },
   "500112538567180296": {
-    "xp": 2887,
+    "xp": 3250,
     "level": 5,
     "lastRank": null
   },
   "314133276870574091": {
-    "xp": 9264,
+    "xp": 9777,
     "level": 9,
     "lastRank": null
   },
   "419190188737298432": {
-    "xp": 7214,
+    "xp": 7538,
     "level": 8,
     "lastRank": null
   },
   "1155551311236960357": {
-    "xp": 3413,
-    "level": 5,
+    "xp": 3607,
+    "level": 6,
     "lastRank": null
   },
   "127911187701694465": {
-    "xp": 1111,
+    "xp": 1178,
     "level": 3,
     "lastRank": null
   },
@@ -41,7 +41,7 @@
     "lastRank": null
   },
   "896449619335196682": {
-    "xp": 7487,
+    "xp": 7723,
     "level": 8,
     "lastRank": null
   },
@@ -53,6 +53,11 @@
   "931659133667647538": {
     "xp": 107,
     "level": 1,
+    "lastRank": null
+  },
+  "1339645128670843051": {
+    "xp": 10,
+    "level": 0,
     "lastRank": null
   }
 }
