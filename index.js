@@ -43,48 +43,67 @@ client.once('ready', async () => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   }, 1800000); // 30 minutos
 
-
-  // Obtenemos el canal desde config.json
-  const colorChannel = await client.channels.fetch(config.colorChannelId);
+  // Obtener los canales desde config.json
+  const colorChannel = await client.channels.fetch(config.channelId);
   const zodiacChannel = await client.channels.fetch(config.zodiacChannelId);
 
-const colorGroups = {
-  reds: config.colorRoles.reds,
-  greens: config.colorRoles.greens,
-  blues: config.colorRoles.blues,
-  yellows: config.colorRoles.yellows,
-  purples: config.colorRoles.purples,
-  bw: config.colorRoles.bw
-};
+  // Grupos de colores
+  const colorGroups = {
+    reds: config.colorRoles.reds,
+    greens: config.colorRoles.greens,
+    blues: config.colorRoles.blues,
+    yellows: config.colorRoles.yellows,
+    purples: config.colorRoles.purples,
+    bw: config.colorRoles.bw
+  };
 
-for (const [groupName, colors] of Object.entries(colorGroups)) {
-  // Si no hay mensaje enviado aún
-  if (!config[`${groupName}MessageId`]) {
-    const embed = new EmbedBuilder()
-      .setTitle(`🎨 ${groupName.toUpperCase()} – Selección Actual`)
+  // Enviar embeds de colores si no existen
+  for (const [groupName, colors] of Object.entries(colorGroups)) {
+    if (!config[`${groupName}MessageId`]) {
+      const embed = new EmbedBuilder()
+        .setTitle(`🎨 ${groupName.toUpperCase()} – Selección Actual`)
+        .setDescription(
+          Object.entries(colors)
+            .map(([emoji, info]) => `${emoji} → ${info.name}`)
+            .join('\n')
+        )
+        .setColor(Number(`0x${Object.values(colors)[0].hex}`));
+
+      const msg = await colorChannel.send({ embeds: [embed] });
+
+      for (const emoji of Object.keys(colors)) await msg.react(emoji);
+
+      // Guardar messageId en config.json
+      config[`${groupName}MessageId`] = msg.id;
+      fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
+    }
+  }
+
+  // Embed de Zodiaco
+  if (!config.zodiacMessageId) {
+    const zodiacEmbed = new EmbedBuilder()
+      .setTitle('♈ Roles Zodiacales')
       .setDescription(
-        Object.entries(colors)
-          .map(([emoji, info]) => `${emoji} → ${info.name}`)
+        Object.entries(config.zodiacRoles)
+          .map(([emoji, role]) => `${emoji} → ${role}`)
           .join('\n')
       )
-      // Usamos el primer color como color del embed
-      .setColor(Number(`0x${Object.values(colors)[0].hex}`));
+      .setColor(0xe67e22);
 
-    const msg = await colorChannel.send({ embeds: [embed] });
+    const zMsg = await zodiacChannel.send({ embeds: [zodiacEmbed] });
+    for (const emoji of Object.keys(config.zodiacRoles)) await zMsg.react(emoji);
 
-    for (const emoji of Object.keys(colors)) await msg.react(emoji);
-
-    // Guardamos messageId en config
-    config[`${groupName}MessageId`] = msg.id;
+    config.zodiacMessageId = zMsg.id;
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
   }
-}
+});
 
-// Asignar roles por reacción
+// Asignar roles al añadir reacción
 client.on('messageReactionAdd', async (reaction, user) => {
   if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
 
+  // Colores
   for (const [groupName, colors] of Object.entries(colorGroups)) {
     if (reaction.message.id === config[`${groupName}MessageId`]) {
       const roleName = colors[reaction.emoji.name]?.name;
@@ -100,8 +119,21 @@ client.on('messageReactionAdd', async (reaction, user) => {
       await member.roles.add(role).catch(console.error);
     }
   }
-})
 
+  // Zodiaco
+  if (reaction.message.id === config.zodiacMessageId) {
+    const roleName = config.zodiacRoles[reaction.emoji.name];
+    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
+    if (!role) return;
+
+    // Quitar roles zodiacales anteriores
+    for (const name of Object.values(config.zodiacRoles)) {
+      const r = reaction.message.guild.roles.cache.find(ro => ro.name === name);
+      if (r && member.roles.cache.has(r.id)) await member.roles.remove(r).catch(console.error);
+    }
+
+    await member.roles.add(role).catch(console.error);
+  }
 });
 
 // Quitar roles al remover reacción
@@ -109,12 +141,20 @@ client.on('messageReactionRemove', async (reaction, user) => {
   if (user.bot || !reaction.message.guild) return;
   const member = await reaction.message.guild.members.fetch(user.id);
 
+  // Colores
   for (const [groupName, colors] of Object.entries(colorGroups)) {
     if (reaction.message.id === config[`${groupName}MessageId`]) {
       const roleName = colors[reaction.emoji.name]?.name;
       const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
       if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
     }
+  }
+
+  // Zodiaco
+  if (reaction.message.id === config.zodiacMessageId) {
+    const roleName = config.zodiacRoles[reaction.emoji.name];
+    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
+    if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
   }
 });
 
