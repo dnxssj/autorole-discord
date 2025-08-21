@@ -43,6 +43,11 @@ client.once('ready', async () => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   }, 1800000); // 30 minutos
 
+
+  // Obtenemos el canal desde config.json
+  const colorChannel = await client.channels.fetch(config.colorChannelId);
+  const zodiacChannel = await client.channels.fetch(config.zodiacChannelId);
+
 const colorGroups = {
   reds: config.colorRoles.reds,
   greens: config.colorRoles.greens,
@@ -65,7 +70,7 @@ for (const [groupName, colors] of Object.entries(colorGroups)) {
       // Usamos el primer color como color del embed
       .setColor(Number(`0x${Object.values(colors)[0].hex}`));
 
-    const msg = await channel.send({ embeds: [embed] });
+    const msg = await colorchannel.send({ embeds: [embed] });
 
     for (const emoji of Object.keys(colors)) await msg.react(emoji);
 
