@@ -1,32 +1,32 @@
 {
   "746490484595097630": {
-    "xp": 4692,
-    "level": 6,
+    "xp": 7803,
+    "level": 8,
     "lastRank": null,
-    "lastClaim": "Wed Aug 20 2025"
+    "lastClaim": "Sat Aug 23 2025"
   },
   "500112538567180296": {
-    "xp": 3250,
-    "level": 5,
+    "xp": 5265,
+    "level": 7,
     "lastRank": null
   },
   "314133276870574091": {
-    "xp": 9777,
-    "level": 9,
-    "lastRank": null
+    "xp": 15850,
+    "level": 12,
+    "lastRank": "Nivel 1 ~ Nova"
   },
   "419190188737298432": {
-    "xp": 7557,
-    "level": 8,
-    "lastRank": null
+    "xp": 12614,
+    "level": 11,
+    "lastRank": "Nivel 1 ~ Nova"
   },
   "1155551311236960357": {
-    "xp": 3622,
+    "xp": 4421,
     "level": 6,
     "lastRank": null
   },
   "127911187701694465": {
-    "xp": 1178,
+    "xp": 1385,
     "level": 3,
     "lastRank": null
   },
@@ -41,9 +41,9 @@
     "lastRank": null
   },
   "896449619335196682": {
-    "xp": 7723,
-    "level": 8,
-    "lastRank": null
+    "xp": 11668,
+    "level": 10,
+    "lastRank": "Nivel 1 ~ Nova"
   },
   "772493201080188999": {
     "xp": 80,
@@ -51,13 +51,23 @@
     "lastRank": null
   },
   "931659133667647538": {
-    "xp": 107,
+    "xp": 205,
     "level": 1,
     "lastRank": null
   },
   "1339645128670843051": {
     "xp": 10,
     "level": 0,
+    "lastRank": null
+  },
+  "929243589475700808": {
+    "xp": 27,
+    "level": 0,
+    "lastRank": null
+  },
+  "924862616227168256": {
+    "xp": 1667,
+    "level": 4,
     "lastRank": null
   }
 }

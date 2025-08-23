@@ -1,8 +1,9 @@
 import './keep_alive.js';
-import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } from 'discord.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import { createCanvas, loadImage, registerFont } from 'canvas';
+import path from "path";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -29,6 +30,21 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
+
+client.commands = new Collection();
+
+const commands = new Map();
+
+// Cargar moderación
+const moderationPath = path.join(process.cwd(), "commands/moderation");
+const moderationFiles = fs.readdirSync(moderationPath).filter(f => f.endsWith(".js"));
+
+for (const file of moderationFiles) {
+  const command = (await import(`./commands/moderation/${file}`)).default;
+  commands.set(command.name, command);
+}
+
+
  /* Grupos de colores
   const colorGroups = {
     reds: config.colorRoles.reds,
@@ -37,7 +53,7 @@ const client = new Client({
     yellows: config.colorRoles.yellows,
     purples: config.colorRoles.purples,
     bw: config.colorRoles.bw
-  };
+  }; 
 
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
@@ -53,6 +69,7 @@ client.once('ready', async () => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   }, 1800000); // 30 minutos
 
+  
   // Obtener los canales desde config.json
   const colorChannel = await client.channels.fetch(config.channelId);
   const zodiacChannel = await client.channels.fetch(config.zodiacChannelId);
@@ -164,37 +181,75 @@ client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;
   const authorId = message.author.id;
 
+    if (message.content.startsWith('!')) {
+    const args = message.content.slice(1).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
+
+    const command = commands.get(commandName); // commands viene del bloque de carga dinámica
+    if (command) {
+      try {
+        await command.execute(message, args, client);
+        return; // si se ejecuta un comando de moderación, no seguimos evaluando los de abajo
+      } catch (err) {
+        console.error(err);
+        return message.reply('❌ Error al ejecutar este comando.');
+      }
+    }
+  }
+
+  
   // Comando !help
   if (message.content === '!help') {
     const embed = new EmbedBuilder()
       .setTitle('📖 Lista de comandos disponibles')
       .setColor(0x00bfff)
-      .setDescription(`
-  **Generales**
+      .addFields(
+        {
+          name: "🔹 Generales",
+          value: `
   \`!help\` → Muestra esta ayuda  
   \`!rank\` → Muestra tu nivel y XP  
   \`!me\` → Muestra tu perfil visual  
-  \`!relacion\` → Muestra tu pareja y tu mejor amig@
-  
-  **Server Booster**
+  \`!relacion\` → Muestra tu pareja y tu mejor amig@`
+        },
+        {
+          name: "💎 Server Booster",
+          value: `
   \`!booster\` → Agradecimiento especial a boosters  
-  \`!claim\` → Reclama XP diario (solo boosters)  
-
-  **Relaciones**
+  \`!claim\` → Reclama XP diario (solo boosters)`
+        },
+        {
+          name: "❤️ Relaciones",
+          value: `
   \`!marryme @usuario\` → Solicitar relación  
   \`!divorce\` → Pedir divorcio  
-  \`!bffme @usuario\` → Elegir mejor amig@
+  \`!bffme @usuario\` → Elegir mejor amig@`
+        },
+        {
+          name: "🎨 Roles por color",
+          value: "Reacciona al mensaje de colores para cambiar el color de tu nickname."
+        }
+      )
+      .setFooter({ text: 'Dexter Bot • por DNX' });
 
-  **🎨 Roles por color**
-  Reacciona al mensaje de colores para cambiar el color de tu nickname.
-
-
-  ⚙️ *Algunos comandos solo están disponibles si tienes ciertos roles.*
-      `)
-      .setFooter({ text: 'Kaneki Bot • por DNX' });
+    
+    if (message.member.roles.cache.some(r => ["admin", "mod"].includes(r.name))) {
+      embed.addFields({
+        name: "⚔️ Moderación",
+        value: `
+  \`!ban [ID]\` → Banear usuario  
+  \`!unban [ID]\` → Desbanear usuario  
+  \`!kick [ID]\` → Expulsar usuario  
+  \`!mute [ID]\` → Silenciar usuario  
+  \`!unmute [ID]\` → Quitar silencio  
+  \`!warn [ID] + nota\` → Advertir usuario  
+  \`!p [ID]\` → Ver historial del usuario`
+      });
+    }
 
     message.channel.send({ embeds: [embed] });
   }
+
 
 
   if (message.content === '!backup') {
