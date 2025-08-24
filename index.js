@@ -60,15 +60,18 @@ client.once('ready', async () => {
 
 });
 
-client.on('messageCreate', async message => {
+const PREFIX = ">";
+
+client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.guild) return;
   const authorId = message.author.id;
 
-    if (message.content.startsWith('!')) {
-    const args = message.content.slice(1).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
+  // --- Router de moderación ---
+  if (message.content.startsWith(PREFIX)) {
+    const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+    const commandName = (args.shift() || '').toLowerCase();
+    const command = commands.get(commandName);
 
-    const command = commands.get(commandName); // commands viene del bloque de carga dinámica
     if (command) {
       try {
         await command.execute(message, args, client);
@@ -335,7 +338,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
 
   // Parejas
-  if (message.content.startsWith('!relacion')) {
+  if (message.content.startsWith('>relacion')) {
   const targetUser = message.mentions.users.first() || message.author;
   const parejaId = parejasData[targetUser.id];
   const bffId = amistadesData[targetUser.id];
@@ -406,7 +409,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
       }
     }).catch(() => message.channel.send('⏰ Tiempo agotado.'));
   }
-  if (message.content === '!divorce') {
+  if (message.content === '>divorce') {
     const parejaId = parejasData[message.author.id];
     if (!parejaId) {
       return message.reply('❌ No estás en pareja actualmente.');
@@ -507,7 +510,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
     const embed = new EmbedBuilder()
       .setTitle('✨ ¡Gracias por boostear el servidor!')
       .setColor(0xf47fff)
-      .setDescription(`⭐ ${message.member.displayName} ⭐\nGracias por apoyar este servidor con tu boost.\n\nPuedes usar el comando \`!claim\` una vez al día para reclamar XP adicional.`)
+      .setDescription(`⭐ ${message.member.displayName} ⭐\nGracias por apoyar este servidor con tu boost.\n\nPuedes usar el comando \`>claim\` una vez al día para reclamar XP adicional.`)
       .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
       .setFooter({ text: 'Sistema de recompensas para boosters' });
 
