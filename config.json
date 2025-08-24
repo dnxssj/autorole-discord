@@ -5,34 +5,34 @@
 
   "colorRoles": {
     "reds": {
-      "🔴": { "name": "rojo_oscuro", "hex": "800e13" },
-      "🟥": { "name": "rojo_fuego", "hex": "da1e37" },
-      "🩷": { "name": "rojo_coral", "hex": "fcb9b2" }
+      "emojigg_1": { "name": "rojo_oscuro", "hex": "800e13", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "rojo_fuego", "hex": "da1e37", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "rojo_coral", "hex": "fcb9b2", "emojiId": "ID_EMOJI_3" }
     },
     "greens": {
-      "🟢": { "name": "verde_menta", "hex": "a5ffd6" },
-      "🌿": { "name": "verde_selva", "hex": "b2ff9e" },
-      "🟩": { "name": "verde_bosque", "hex": "3ba342" }
+      "emojigg_1": { "name": "verde_menta", "hex": "a5ffd6", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "verde_selva", "hex": "b2ff9e", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "verde_bosque", "hex": "3ba342", "emojiId": "ID_EMOJI_3" }
     },
     "blues": {
-      "🔵": { "name": "azul_medianoche", "hex": "0b2545" },
-      "🟦": { "name": "azul_cielo", "hex": "4492ce" },
-      "💙": { "name": "azul_océano", "hex": "1b7ddf" }
+      "emojigg_1": { "name": "azul_medianoche", "hex": "0b2545", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "azul_cielo", "hex": "4492ce", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "azul_océano", "hex": "1b7ddf", "emojiId": "ID_EMOJI_3" }
     },
     "yellows": {
-      "🟡": { "name": "amarillo_oro", "hex": "f9c80e" },
-      "🌕": { "name": "amarillo_sol", "hex": "ffbc42" },
-      "🟨": { "name": "amarillo_miel", "hex": "ffcb69" }
+      "emojigg_1": { "name": "amarillo_oro", "hex": "f9c80e", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "amarillo_sol", "hex": "ffbc42", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "amarillo_miel", "hex": "ffcb69", "emojiId": "ID_EMOJI_3" }
     },
     "purples": {
-      "🟣": { "name": "violeta_nocturno", "hex": "662e9b" },
-      "🟪": { "name": "violeta_lavanda", "hex": "b298dc" },
-      "💜": { "name": "violeta_malva", "hex": "dbcdf0" }
+      "emojigg_1": { "name": "violeta_nocturno", "hex": "662e9b", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "violeta_lavanda", "hex": "b298dc", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "violeta_malva", "hex": "dbcdf0", "emojiId": "ID_EMOJI_3" }
     },
     "bw": {
-      "⚪": { "name": "blanco_nieve", "hex": "fff1e6" },
-      "⬜": { "name": "blanco_marfil", "hex": "e7e1ca" },
-      "⚫": { "name": "negro_medianoche", "hex": "202020" }
+      "emojigg_1": { "name": "blanco_nieve", "hex": "fff1e6", "emojiId": "ID_EMOJI_1" },
+      "emojigg_2": { "name": "blanco_marfil", "hex": "e7e1ca", "emojiId": "ID_EMOJI_2" },
+      "emojigg_3": { "name": "negro_medianoche", "hex": "202020", "emojiId": "ID_EMOJI_3" }
     }
   },
   "zodiacRoles": {
@@ -50,13 +50,26 @@
     "♓": "Piscis"
   },
 
-  "redsMessageId": "1408090274562838568",
-  "greensMessageId": "1408090282720886814",
-  "bluesMessageId": "1408090289347756052",
-  "yellowsMessageId": "1408090296209772785",
-  "purplesMessageId": "1408090303835148318",
-  "bwMessageId": "1408090312580272189",
-  "zodiacMessageId": "1408090319479771319",
+    "regionRoles": {
+    "emojigg_1": { "name": "Europa",   "emojiId": "ID_EMOJI_1" },
+    "emojigg_2": { "name": "Latam",    "emojiId": "ID_EMOJI_2" },
+    "emojigg_3": { "name": "Norteamérica", "emojiId": "ID_EMOJI_3" },
+    "emojigg_4": { "name": "Otro", "emojiId": "ID_EMOJI_4"}
+  },
+  "ageRoles": {
+    "emojigg_1": { "name": "+18", "emojiId": "ID_EMOJI_1" },
+    "emojigg_2": { "name": "-18", "emojiId": "ID_EMOJI_2" }
+  },
+
+  "redsMessageId": "",
+  "greensMessageId": "",
+  "bluesMessageId": "",
+  "yellowsMessageId": "",
+  "purplesMessageId": "",
+  "bwMessageId": "",
+  "zodiacMessageId": "",
+  "regionMessageId": "",
+  "ageMessageId": "",
 
   "levelUpChannelId": "635059262002823169"
 }

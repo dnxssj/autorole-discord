@@ -1,9 +1,11 @@
 import './keep_alive.js';
-import { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } from 'discord.js';
+import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import { createCanvas, loadImage, registerFont } from 'canvas';
 import path from "path";
+import { initReactionRoles } from "./features/reactionRoles.js";
+
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -30,30 +32,17 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
+initReactionRoles(client, config);
 
-client.commands = new Collection();
-
+// cargar comandos
 const commands = new Map();
+const commandFiles = fs.readdirSync("./commands/moderation").filter(file => file.endsWith(".js"));
 
-// Cargar moderación
-const moderationPath = path.join(process.cwd(), "commands/moderation");
-const moderationFiles = fs.readdirSync(moderationPath).filter(f => f.endsWith(".js"));
-
-for (const file of moderationFiles) {
+for (const file of commandFiles) {
   const command = (await import(`./commands/moderation/${file}`)).default;
   commands.set(command.name, command);
 }
 
-
- /* Grupos de colores
-  const colorGroups = {
-    reds: config.colorRoles.reds,
-    greens: config.colorRoles.greens,
-    blues: config.colorRoles.blues,
-    yellows: config.colorRoles.yellows,
-    purples: config.colorRoles.purples,
-    bw: config.colorRoles.bw
-  }; 
 
 client.once('ready', async () => {
   console.log(`✅ Conectado como ${client.user.tag}`);
@@ -69,113 +58,7 @@ client.once('ready', async () => {
     client.user.setPresence({ status: 'online', activities: [activities[i++ % activities.length]] });
   }, 1800000); // 30 minutos
 
-  
-  // Obtener los canales desde config.json
-  const colorChannel = await client.channels.fetch(config.channelId);
-  const zodiacChannel = await client.channels.fetch(config.zodiacChannelId);
-
-
-
-  // Enviar embeds de colores si no existen
-  for (const [groupName, colors] of Object.entries(colorGroups)) {
-    if (!config[`${groupName}MessageId`]) {
-      const embed = new EmbedBuilder()
-        .setTitle(`🎨 ${groupName.toUpperCase()} – Selección Actual`)
-        .setDescription(
-          Object.entries(colors)
-            .map(([emoji, info]) => `${emoji} → ${info.name}`)
-            .join('\n')
-        )
-        .setColor(Number(`0x${Object.values(colors)[0].hex}`));
-
-      const msg = await colorChannel.send({ embeds: [embed] });
-
-      for (const emoji of Object.keys(colors)) await msg.react(emoji);
-
-      // Guardar messageId en config.json
-      config[`${groupName}MessageId`] = msg.id;
-      fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
-    }
-  }
-
-  // Embed de Zodiaco
-  if (!config.zodiacMessageId) {
-    const zodiacEmbed = new EmbedBuilder()
-      .setTitle('♈ Roles Zodiacales')
-      .setDescription(
-        Object.entries(config.zodiacRoles)
-          .map(([emoji, role]) => `${emoji} → ${role}`)
-          .join('\n')
-      )
-      .setColor(0xe67e22);
-
-    const zMsg = await zodiacChannel.send({ embeds: [zodiacEmbed] });
-    for (const emoji of Object.keys(config.zodiacRoles)) await zMsg.react(emoji);
-
-    config.zodiacMessageId = zMsg.id;
-    fs.writeFileSync('./config.json', JSON.stringify(config, null, 2));
-  }
 });
-
-// Asignar roles al añadir reacción
-client.on('messageReactionAdd', async (reaction, user) => {
-  if (user.bot || !reaction.message.guild) return;
-  const member = await reaction.message.guild.members.fetch(user.id);
-
-  // Colores
-  for (const [groupName, colors] of Object.entries(colorGroups)) {
-    if (reaction.message.id === config[`${groupName}MessageId`]) {
-      const roleName = colors[reaction.emoji.name]?.name;
-      const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-      if (!role) return;
-
-      // Quitar roles anteriores de este grupo
-      for (const info of Object.values(colors)) {
-        const r = reaction.message.guild.roles.cache.find(ro => ro.name === info.name);
-        if (r && member.roles.cache.has(r.id)) await member.roles.remove(r).catch(console.error);
-      }
-
-      await member.roles.add(role).catch(console.error);
-    }
-  }
-
-  // Zodiaco
-  if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = config.zodiacRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (!role) return;
-
-    // Quitar roles zodiacales anteriores
-    for (const name of Object.values(config.zodiacRoles)) {
-      const r = reaction.message.guild.roles.cache.find(ro => ro.name === name);
-      if (r && member.roles.cache.has(r.id)) await member.roles.remove(r).catch(console.error);
-    }
-
-    await member.roles.add(role).catch(console.error);
-  }
-});
-
-// Quitar roles al remover reacción
-client.on('messageReactionRemove', async (reaction, user) => {
-  if (user.bot || !reaction.message.guild) return;
-  const member = await reaction.message.guild.members.fetch(user.id);
-
-  // Colores
-  for (const [groupName, colors] of Object.entries(colorGroups)) {
-    if (reaction.message.id === config[`${groupName}MessageId`]) {
-      const roleName = colors[reaction.emoji.name]?.name;
-      const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-      if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
-    }
-  }
-
-  // Zodiaco
-  if (reaction.message.id === config.zodiacMessageId) {
-    const roleName = config.zodiacRoles[reaction.emoji.name];
-    const role = reaction.message.guild.roles.cache.find(r => r.name === roleName);
-    if (role && member.roles.cache.has(role.id)) await member.roles.remove(role).catch(console.error);
-  } 
-}); */
 
 client.on('messageCreate', async message => {
   if (message.author.bot || !message.guild) return;

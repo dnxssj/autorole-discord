@@ -1,51 +1,68 @@
-const { EmbedBuilder } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
+// /commands/moderation/p.js (ESM)
+import fs from "fs";
+import path from "path";
+import { EmbedBuilder } from "discord.js";
 
-module.exports = {
-    name: "p",
-    description: "Ver historial e información de un usuario",
-    async execute(message, args) {
-        // Solo roles admin o mod
-        if (!message.member.roles.cache.some(r => ["admin", "mod"].includes(r.name))) {
-            return message.reply("❌ No tienes permiso para usar este comando.");
-        }
+const logsFile = path.resolve("./registros.json");
 
-        const userId = args[0];
-        if (!userId) {
-            return message.reply("⚠️ Debes proporcionar la **ID** del usuario.");
-        }
+function loadLogs() {
+  if (!fs.existsSync(logsFile)) return { bans: {}, warns: {} };
+  return JSON.parse(fs.readFileSync(logsFile, "utf8"));
+}
+function hasStaffRole(member) {
+  return member.roles.cache.some(r => ["admin", "mod"].includes(r.name.toLowerCase()));
+}
 
-        let member;
-        try {
-            member = await message.guild.members.fetch(userId);
-        } catch (err) {
-            return message.reply("❌ No se encontró ningún usuario con esa ID en este servidor.");
-        }
-
-        // Cargar historial (si existe archivo de warns)
-        let warnsData = {};
-        const warnsPath = path.join(__dirname, "../../registros.json");
-        if (fs.existsSync(warnsPath)) {
-            warnsData = JSON.parse(fs.readFileSync(warnsPath, "utf8"));
-        }
-
-        const userWarns = warnsData[userId] || [];
-
-        const embed = new EmbedBuilder()
-            .setColor("Red")
-            .setTitle(`📋 Informe de ${member.user.tag}`)
-            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-            .addFields(
-                { name: "🆔 ID", value: `${member.user.id}`, inline: true },
-                { name: "🎭 Roles", value: member.roles.cache.map(r => r.name).join(", ") || "Ninguno", inline: false },
-                { name: "⏰ Cuenta creada", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
-                { name: "📅 Se unió", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>`, inline: true },
-                { name: "⚠️ Historial de warns", value: userWarns.length > 0 ? userWarns.map((w, i) => `\`${i+1}.\` ${w.reason} (por <@${w.moderator}>)`).join("\n") : "✅ Sin advertencias", inline: false }
-            )
-            .setFooter({ text: `Moderación - Consulta de usuario` })
-            .setTimestamp();
-
-        message.channel.send({ embeds: [embed] });
+export default {
+  name: "p",
+  description: "Ver historial/información por ID",
+  async execute(message, args) {
+    if (!hasStaffRole(message.member)) {
+      return message.reply("❌ No tienes permiso para usar este comando.");
     }
+
+    const userId = args[0];
+    if (!userId) return message.reply("⚠️ Debes proporcionar la **ID** del usuario.");
+
+    const member = await message.guild.members.fetch(userId).catch(() => null);
+    if (!member) return message.reply("❌ No se encontró ningún usuario con esa ID en este servidor.");
+
+    const logs = loadLogs();
+    const warns = logs.warns[userId] || [];
+    const bans = logs.bans[userId] || [];
+
+    const roles = member.roles.cache
+      .filter(r => r.name !== "@everyone")
+      .map(r => r.name)
+      .join(", ") || "Ninguno";
+
+    const embed = new EmbedBuilder()
+      .setColor(0xdc2626) // rojo
+      .setTitle(`📋 Informe de ${member.user.tag}`)
+      .setThumbnail(member.user.displayAvatarURL({ forceStatic: false }))
+      .addFields(
+        { name: "🆔 ID", value: userId, inline: true },
+        { name: "⏰ Cuenta creada", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+        { name: "📅 Se unió", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>`, inline: true },
+        { name: "🎭 Roles", value: roles, inline: false },
+        {
+          name: "⚠️ Warns",
+          value: warns.length
+            ? warns.map((w, i) => `\`${i + 1}.\` ${w.reason} (por <@${w.moderator}>) — <t:${Math.floor(new Date(w.date).getTime() / 1000)}:R>`).join("\n").slice(0, 1024)
+            : "✅ Sin advertencias",
+          inline: false
+        },
+        {
+          name: "⛔ Bans (registro)",
+          value: bans.length
+            ? bans.map((b, i) => `\`${i + 1}.\` ${b.reason} (por <@${b.moderator}>) — <t:${Math.floor(new Date(b.date).getTime() / 1000)}:R>`).join("\n").slice(0, 1024)
+            : "—",
+          inline: false
+        }
+      )
+      .setFooter({ text: "Moderación - Consulta de usuario" })
+      .setTimestamp();
+
+    return message.channel.send({ embeds: [embed] });
+  },
 };
