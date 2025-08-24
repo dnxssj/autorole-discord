@@ -531,7 +531,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
       return message.reply('🕒 Ya has reclamado tu XP extra hoy. Intenta mañana.');
     }
 
-    const xpAmount = 150;
+    const xpAmount = 350;
     userData.xp += xpAmount;
     userData.lastClaim = now;
     fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
@@ -546,7 +546,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   }
 
 
-if (!message.content.startsWith('!')) {
+if (!message.content.startsWith('>')) {
 
   if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
   const userXp = xpData[authorId];
