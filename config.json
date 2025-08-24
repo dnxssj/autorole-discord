@@ -17,7 +17,7 @@
     "blues": {
       "emojigg_1": { "name": "azul_medianoche", "hex": "0b2545", "emojiId": "1409107708803678239" },
       "emojigg_2": { "name": "azul_cielo", "hex": "4492ce", "emojiId": "1409107770258751498" },
-      "emojigg_3": { "name": "azul_océano", "hex": "1b7ddf", "emojiId": "1409107812587667530" }
+      "emojigg_3": { "name": "azul_oceano", "hex": "1b7ddf", "emojiId": "1409107812587667530" }
     },
     "yellows": {
       "emojigg_1": { "name": "amarillo_oro", "hex": "f9c80e", "emojiId": "1409107708803678239" },
