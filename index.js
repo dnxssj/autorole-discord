@@ -82,7 +82,7 @@ client.on('messageCreate', async message => {
 
   
   // Comando !help
-  if (message.content === '!help') {
+  if (message.content === '>help') {
     const embed = new EmbedBuilder()
       .setTitle('📖 Lista de comandos disponibles')
       .setColor(0x00bfff)
@@ -90,23 +90,23 @@ client.on('messageCreate', async message => {
         {
           name: "🔹 Generales",
           value: `
-  \`!help\` → Muestra esta ayuda  
-  \`!rank\` → Muestra tu nivel y XP  
-  \`!me\` → Muestra tu perfil visual  
-  \`!relacion\` → Muestra tu pareja y tu mejor amig@`
+  \`>help\` → Muestra esta ayuda  
+  \`>rank\` → Muestra tu nivel y XP  
+  \`>me\` → Muestra tu perfil visual  
+  \`>relacion\` → Muestra tu pareja y tu mejor amig@`
         },
         {
           name: "💎 Server Booster",
           value: `
-  \`!booster\` → Agradecimiento especial a boosters  
-  \`!claim\` → Reclama XP diario (solo boosters)`
+  \`>booster\` → Agradecimiento especial a boosters  
+  \`>claim\` → Reclama XP diario (solo boosters)`
         },
         {
           name: "❤️ Relaciones",
           value: `
-  \`!marryme @usuario\` → Solicitar relación  
-  \`!divorce\` → Pedir divorcio  
-  \`!bffme @usuario\` → Elegir mejor amig@`
+  \`>marryme @usuario\` → Solicitar relación  
+  \`>divorce\` → Pedir divorcio  
+  \`>bffme @usuario\` → Elegir mejor amig@`
         },
         {
           name: "🎨 Roles por color",
@@ -120,13 +120,13 @@ client.on('messageCreate', async message => {
       embed.addFields({
         name: "⚔️ Moderación",
         value: `
-  \`!ban [ID]\` → Banear usuario  
-  \`!unban [ID]\` → Desbanear usuario  
-  \`!kick [ID]\` → Expulsar usuario  
-  \`!mute [ID]\` → Silenciar usuario  
-  \`!unmute [ID]\` → Quitar silencio  
-  \`!warn [ID] + nota\` → Advertir usuario  
-  \`!p [ID]\` → Ver historial del usuario`
+  \`>ban [ID]\` → Banear usuario  
+  \`>unban [ID]\` → Desbanear usuario  
+  \`>kick [ID]\` → Expulsar usuario  
+  \`>mute [ID]\` → Silenciar usuario  
+  \`>unmute [ID]\` → Quitar silencio  
+  \`>warn [ID] + nota\` → Advertir usuario  
+  \`>p [ID]\` → Ver historial del usuario`
       });
     }
 
@@ -135,7 +135,7 @@ client.on('messageCreate', async message => {
 
 
 
-  if (message.content === '!backup') {
+  if (message.content === '>backup') {
     const allowedIds = [process.env.ADMIN_ID_1, process.env.ADMIN_ID_2];
     if (!allowedIds.includes(authorId)) {
       return message.reply('🚫 Este comando es solo para administradores autorizados.');
@@ -163,7 +163,7 @@ client.on('messageCreate', async message => {
 
 
   
-  if (message.content.startsWith('!rank')) {
+  if (message.content.startsWith('>rank')) {
     const target = message.mentions.users.first() || message.author;
     const targetId = target.id;
 
@@ -196,7 +196,7 @@ client.on('messageCreate', async message => {
   }
 
 
-if (message.content.startsWith('!me')) {
+if (message.content.startsWith('>me')) {
   const targetUser = message.mentions.users.first() || message.author;
   const targetId = targetUser.id;
 
@@ -362,7 +362,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 }
 
 
-  if (message.content.startsWith('!marryme')) {
+  if (message.content.startsWith('>marryme')) {
     const target = message.mentions.users.first();
     if (!target || target.bot || target.id === message.author.id) {
       return message.reply('❗ Menciona a una persona válida para casarte.');
@@ -454,7 +454,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
 
   // Amistades
-  if (message.content.startsWith('!bffme')) {
+  if (message.content.startsWith('>bffme')) {
     const target = message.mentions.users.first();
     if (!target || target.bot || target.id === message.author.id) {
       return message.reply('❗ Menciona a una persona válida para ser mejores amig@s.');
@@ -498,7 +498,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
 
   //For boosters only
-  if (message.content === '!booster') {
+  if (message.content === '>booster') {
     const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
     if (!boosterRole || !message.member.roles.cache.has(boosterRole.id)) {
       return message.reply('🚫 Este comando es exclusivo para boosters del servidor.');
@@ -517,7 +517,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   const claimCooldown = './claimCooldowns.json';
   let cooldowns = fs.existsSync(claimCooldown) ? JSON.parse(fs.readFileSync(claimCooldown)) : {};
 
-  if (message.content === '!claim') {
+  if (message.content === '>claim') {
     const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
     if (!boosterRole || !message.member.roles.cache.has(boosterRole.id)) {
       return message.reply('🚫 Solo los boosters pueden reclamar XP extra.');
