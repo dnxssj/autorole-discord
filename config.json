@@ -61,15 +61,15 @@
     "emojigg_2": { "name": "-18", "emojiId": "1409107770258751498" }
   },
 
-  "redsMessageId": "",
-  "greensMessageId": "",
-  "bluesMessageId": "",
-  "yellowsMessageId": "",
-  "purplesMessageId": "",
-  "bwMessageId": "",
-  "zodiacMessageId": "",
-  "regionMessageId": "",
-  "ageMessageId": "",
+  "redsMessageId": "1409145837761724608",
+  "greensMessageId": "1409145843256397877",
+  "bluesMessageId": "1409145850801688687",
+  "yellowsMessageId": "1409145858796027985",
+  "purplesMessageId": "1409145866463219832",
+  "bwMessageId": "1409145873597857883",
+  "zodiacMessageId": "1409145897387823124",
+  "regionMessageId": "1409145881256661064",
+  "ageMessageId": "1409145891176185876",
 
   "levelUpChannelId": "635059262002823169"
 }
