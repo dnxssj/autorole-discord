@@ -34,14 +34,22 @@ const client = new Client({
 
 initReactionRoles(client, config);
 
-// cargar comandos
 const commands = new Map();
-const commandFiles = fs.readdirSync("./commands/moderation").filter(file => file.endsWith(".js"));
 
-for (const file of commandFiles) {
+// Moderación
+const moderationFiles = fs.readdirSync("./commands/moderation").filter(f => f.endsWith(".js"));
+for (const file of moderationFiles) {
   const command = (await import(`./commands/moderation/${file}`)).default;
   commands.set(command.name, command);
 }
+
+// Diversión (fun)
+const funFiles = fs.readdirSync("./commands/fun").filter(f => f.endsWith(".js"));
+for (const file of funFiles) {
+  const command = (await import(`./commands/fun/${file}`)).default;
+  commands.set(command.name, command);
+}
+
 
 
 client.once('ready', async () => {
@@ -109,7 +117,8 @@ client.on('messageCreate', async (message) => {
           value: `
   \`>marryme @usuario\` → Solicitar relación  
   \`>divorce\` → Pedir divorcio  
-  \`>bffme @usuario\` → Elegir mejor amig@`
+  \`>bffme @usuario\` → Elegir mejor amig@
+  \`>love @usuario1 @usuario2\` → Calcula el porcentaje de éxito en el amor entre dos personas`
         },
         {
           name: "🎨 Roles por color",
@@ -144,7 +153,7 @@ client.on('messageCreate', async (message) => {
       return message.reply('🚫 Este comando es solo para administradores autorizados.');
     }
 
-    const archivos = ['xp.json', 'parejas.json', 'amistades.json', 'claimCooldowns.json'].filter(file =>
+    const archivos = ['xp.json', 'parejas.json', 'amistades.json', 'claimCooldowns.json', 'registros.json'].filter(file =>
       fs.existsSync(`./${file}`)
     );
 

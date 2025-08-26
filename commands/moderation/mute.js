@@ -1,32 +1,34 @@
-// /commands/moderation/mute.js (ESM)
-function hasStaffRole(member) {
-  return member.roles.cache.some(r => ["admin", "mod"].includes(r.name.toLowerCase()));
-}
+import fs from "fs";
 
 export default {
   name: "mute",
-  description: "Silenciar por ID (timeout)",
-  async execute(message, args) {
-    if (!hasStaffRole(message.member)) {
-      return message.reply("❌ No tienes permiso para usar este comando.");
+  description: "Silencia por ID",
+  async execute(message, args, client) {
+    if (!message.member.roles.cache.some(r => ["admin", "mod"].includes(r.name))) {
+      return message.reply("❌ No tienes permisos.");
     }
 
     const userId = args[0];
-    const minutes = parseInt(args[1], 10) || 10;
-    const reason = args.slice(2).join(" ") || `Muteado por ${message.author.tag}`;
-    if (!userId) return message.reply("⚠️ Debes proporcionar la **ID** del usuario.");
+    const duration = parseInt(args[1]) || 10; // minutos
+    const reason = args.slice(2).join(" ") || "No especificada";
+    if (!userId) return message.reply("⚠️ Uso: `>mute [ID] [minutos] [razón]`");
 
     try {
-      const member = await message.guild.members.fetch(userId).catch(() => null);
-      if (!member) return message.reply("❌ Ese usuario no está en el servidor.");
-      if (!member.moderatable) return message.reply("❌ No puedo aplicar timeout a ese usuario.");
+      const member = await message.guild.members.fetch(userId);
+      await member.timeout(duration * 60 * 1000, reason);
+      await message.channel.send(`🔇 ${member.user.tag} muteado ${duration}m.`);
 
-      const ms = Math.max(1, minutes) * 60 * 1000;
-      await member.timeout(ms, reason);
-      return message.channel.send(`🔇 ${member.user.tag} muteado ${minutes} min. Razón: ${reason}`);
+      const { logModAction } = await import("../../features/modlog.js");
+      const config = JSON.parse(fs.readFileSync("./config.json"));
+      await logModAction(client, config, {
+        type: "mute",
+        userId,
+        moderatorId: message.author.id,
+        reason
+      });
     } catch (err) {
       console.error(err);
-      return message.reply("❌ No pude mutear al usuario. Verifica permisos del bot.");
+      message.reply("❌ No pude mutear al usuario.");
     }
-  },
+  }
 };
