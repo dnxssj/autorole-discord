@@ -74,9 +74,7 @@ async function renderCard({ member, bgPath, title, subtitle }) {
   ctx.fillText(subtitle, 230, 175);
 
   // Nombre destacado (opcional)
-  const tag = member.user.discriminator === "0"
-  ? member.user.username
-  : `${member.user.username}#${member.user.discriminator}`;
+  const tag = member.user.globalName || member.user.username;
   ctx.font = "bold 28px Roboto, Sans-Serif";
   ctx.fillText(tag, 230, 215);
 
