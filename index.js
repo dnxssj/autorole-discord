@@ -5,7 +5,7 @@ import fs from 'fs';
 import { createCanvas, loadImage, registerFont } from 'canvas';
 import path from "path";
 import { initReactionRoles } from "./features/reactionRoles.js";
-
+import { initWelcomeSystem } from "./features/welcomeSystem.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -33,6 +33,7 @@ const client = new Client({
 });
 
 initReactionRoles(client, config);
+initWelcomeSystem(client, config);
 
 const commands = new Map();
 

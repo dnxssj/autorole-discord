@@ -2,6 +2,11 @@
   "guildId": "635059261298311179",
   "channelId": "1406645622013952100",
   "zodiacChannelId": "1406645622013952100",
+  "welcomeChannelId": "ID_DEL_CANAL",
+  "welcomeBackgroundPath": "./assets/welcome.png",
+  "goodbyeBackgroundPath": "./assets/goodbye.png",
+  "welcomeText": "¡Bienvenid@ al servidor!",
+  "goodbyeText": "¡Hasta pronto!",
 
   "colorRoles": {
     "reds": {
