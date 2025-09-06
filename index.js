@@ -37,7 +37,7 @@ const client = new Client({
 initReactionRoles(client, config);
 initWelcomeSystem(client, config);
 initAutoStar(client, config);
-initAutoBackup(client); 
+autoBackup(client, config); 
 
 const commands = new Map();
 
