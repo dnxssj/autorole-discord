@@ -84,7 +84,7 @@
 
   "specialPhrase": {
     "userId": "734466902977544313",
-    "pattern": "tengo razón\\??",
+    "pattern": "tengo razon\\s*\\??",
     "regex": true,
     "flags": "i",
     "wholeWord": false,
@@ -94,5 +94,6 @@
     "ignoreBots": true,
     "channels": ["635059262002823169"]
   }
+
 
 }
