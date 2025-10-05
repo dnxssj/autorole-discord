@@ -21,6 +21,21 @@ let parejasData = fs.existsSync(parejasFile) ? JSON.parse(fs.readFileSync(pareja
 const amistadesFile = './amistades.json';
 let amistadesData = fs.existsSync(amistadesFile) ? JSON.parse(fs.readFileSync(amistadesFile)) : {};
 
+// Helpers BFFs (soporta formato viejo string -> array)
+function getBffs(userId) {
+  const raw = amistadesData[userId];
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  // migrar string viejo
+  return [raw];
+}
+
+function setBffs(userId, arr) {
+  amistadesData[userId] = Array.from(new Set(arr)); // unique
+  fs.writeFileSync(amistadesFile, JSON.stringify(amistadesData, null, 2));
+}
+
+
 const getRequiredXp = lvl => Math.floor(Math.pow((lvl + 1) / 0.1, 2));
 
 const client = new Client({
@@ -123,7 +138,10 @@ client.on('messageCreate', async (message) => {
   \`>marryme @usuario\` → Solicitar relación  
   \`>divorce\` → Pedir divorcio  
   \`>bffme @usuario\` → Elegir mejor amig@
-  \`>love @usuario1 @usuario2\` → Calcula el porcentaje de éxito en el amor entre dos personas`
+  \`>love @usuario1 @usuario2\` → Calcula el porcentaje de éxito en el amor entre dos personas
+  \`>bfflist @usuario\` → Ver lista de mejores amig@s  
+  \`>unbff @usuario\` → Quitar de tus mejores amig@s`
+
         },
         {
           name: "🎨 Roles por color",
@@ -216,6 +234,7 @@ client.on('messageCreate', async (message) => {
 if (message.content.startsWith('>me')) {
   const targetUser = message.mentions.users.first() || message.author;
   const targetId = targetUser.id;
+  const bffIds = getBffs(targetId).slice(0, 4);
 
   if (!xpData[targetId]) xpData[targetId] = { xp: 0, level: 0, lastRank: null };
   const userData = xpData[targetId];
@@ -226,8 +245,14 @@ if (message.content.startsWith('>me')) {
   const member = await message.guild.members.fetch(targetId);
   const parejaId = parejasData[targetId];
   const pareja = parejaId ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido' : 'Solter@';
-  const bffId = amistadesData[targetId];
-  const bff = bffId ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin mejor amig@' : 'Sin mejor amig@';
+  // BFFs (hasta 4 nombres)
+  const bffNames = [];
+  for (const id of bffIds) {
+    const m = await message.guild.members.fetch(id).catch(() => null);
+    if (m) bffNames.push(m.displayName);
+  }
+  const bffText = bffNames.length ? bffNames.join(', ') : 'Sin mejores amig@s';
+
 
   const canvas = createCanvas(600, 600);
   const ctx = canvas.getContext('2d');
@@ -291,7 +316,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
   ctx.font = 'bold 22px Roboto';
   ctx.fillText(`Relación: ${pareja}`, cx, 320);
-  ctx.fillText(`Mejor amig@: ${bff}`, cx, 350);
+  ctx.fillText(`Mejores amig@s: ${bffText}`, cx, 350);
 
   const barWidth = 300;
   const barHeight = 24;
@@ -352,18 +377,23 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
 
   // Parejas
-  if (message.content.startsWith('>relacion')) {
+if (message.content.startsWith('>relacion')) {
   const targetUser = message.mentions.users.first() || message.author;
-  const parejaId = parejasData[targetUser.id];
-  const bffId = amistadesData[targetUser.id];
+  const targetId = targetUser.id;
 
+  const parejaId = parejasData[targetId];
   const parejaName = parejaId
     ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido'
     : 'Solter@';
 
-  const bffName = bffId
-    ? (await message.guild.members.fetch(bffId).catch(() => null))?.displayName || 'Sin mejor amig@'
-    : 'Sin mejor amig@';
+  // BFFs hasta 4
+  const bffIds = getBffs(targetId).slice(0, 4);
+  const bffNames = [];
+  for (const id of bffIds) {
+    const m = await message.guild.members.fetch(id).catch(() => null);
+    if (m) bffNames.push(m.displayName);
+  }
+  const bffText = bffNames.length ? bffNames.join(', ') : 'Sin mejores amig@s';
 
   const embed = new EmbedBuilder()
     .setTitle(`💖 Relaciones de ${targetUser.username}`)
@@ -371,7 +401,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
     .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
     .addFields(
       { name: 'Relación', value: parejaName, inline: true },
-      { name: 'Mejor amig@', value: bffName, inline: true }
+      { name: 'Mejores amig@s', value: bffText, inline: true }
     )
     .setFooter({ text: '¡Qué bonito! 🌸' });
 
@@ -471,48 +501,137 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
 
   // Amistades
-  if (message.content.startsWith('>bffme')) {
-    const target = message.mentions.users.first();
-    if (!target || target.bot || target.id === message.author.id) {
-      return message.reply('❗ Menciona a una persona válida para ser mejores amig@s.');
-    }
-
-    const yaSonBffs = amistadesData[message.author.id] === target.id || amistadesData[target.id] === message.author.id;
-    if (yaSonBffs) {
-      return message.reply('💛 ¡Ya sois mejores amig@s!');
-    }
-
-    const confirmMsg = await message.channel.send({
-      content: `${target}, ${message.author} quiere ser tu mejor amig@ 🌟\n¿Aceptas?`,
-      embeds: [new EmbedBuilder().setColor(0xffd700).setDescription('Reacciona con ✅ o ❌')]
-    });
-
-    await confirmMsg.react('✅');
-    await confirmMsg.react('❌');
-
-    confirmMsg.awaitReactions({
-      filter: (r, u) => ['✅', '❌'].includes(r.emoji.name) && u.id === target.id,
-      max: 1,
-      time: 60000,
-      errors: ['time']
-    }).then(collected => {
-      const emoji = collected.first().emoji.name;
-      if (emoji === '✅') {
-        amistadesData[message.author.id] = target.id;
-        amistadesData[target.id] = message.author.id;
-        fs.writeFileSync(amistadesFile, JSON.stringify(amistadesData, null, 2));
-        message.channel.send({
-          embeds: [new EmbedBuilder()
-            .setTitle('🤝 ¡Nueva mejor amistad!')
-            .setDescription(`${message.author} y ${target} ahora son mejores amig@s 🧡`)
-            .setColor(0xffd700)]
-        });
-      } else {
-        message.channel.send('😢 Solicitud de amistad rechazada.');
-      }
-    }).catch(() => message.channel.send('⏰ Tiempo agotado.'));
+// Amistades (hasta 4 BFFs)
+if (message.content.startsWith('>bffme')) {
+  const target = message.mentions.users.first();
+  if (!target || target.bot || target.id === message.author.id) {
+    return message.reply('❗ Menciona a una persona válida para ser mejores amig@s.');
   }
 
+  const myList = getBffs(message.author.id);
+  const theirList = getBffs(target.id);
+
+  // ya sois BFFs
+  if (myList.includes(target.id) && theirList.includes(message.author.id)) {
+    return message.reply('💛 ¡Ya sois mejores amig@s!');
+  }
+
+  // límite 4
+  if (myList.length >= 4) {
+    return message.reply('⚠️ Ya tienes 4 mejores amig@s. Usa `>unbff @alguien` para liberar un hueco.');
+  }
+  if (theirList.length >= 4) {
+    return message.reply('⚠️ Esa persona ya tiene 4 mejores amig@s. No puede aceptar más.');
+  }
+
+  const confirmMsg = await message.channel.send({
+    content: `${target}, ${message.author} quiere ser tu mejor amig@ 🌟\n¿Aceptas?`,
+    embeds: [new EmbedBuilder().setColor(0xffd700).setDescription('Reacciona con ✅ o ❌')]
+  });
+
+  await confirmMsg.react('✅');
+  await confirmMsg.react('❌');
+
+  confirmMsg.awaitReactions({
+    filter: (r, u) => ['✅', '❌'].includes(r.emoji.name) && u.id === target.id,
+    max: 1,
+    time: 60000,
+    errors: ['time']
+  }).then(collected => {
+    const emoji = collected.first().emoji.name;
+    if (emoji === '✅') {
+      // añade en ambos sentidos (sin duplicar) y respetando límite 4
+      const mine = getBffs(message.author.id);
+      const theirs = getBffs(target.id);
+
+      if (mine.length >= 4) return message.channel.send('⚠️ A última hora te quedaste sin hueco (tienes 4).');
+      if (theirs.length >= 4) return message.channel.send('⚠️ Esa persona ya llegó a 4 justo ahora.');
+
+      if (!mine.includes(target.id)) mine.unshift(target.id);       // nuevo primero
+      if (!theirs.includes(message.author.id)) theirs.unshift(message.author.id);
+
+      setBffs(message.author.id, mine);   // setBffs ya deduplica
+      setBffs(target.id, theirs);
+
+      message.channel.send({
+        embeds: [new EmbedBuilder()
+          .setTitle('🤝 ¡Nueva mejor amistad!')
+          .setDescription(`${message.author} y ${target} ahora son mejores amig@s 🧡`)
+          .setColor(0xffd700)]
+      });
+    } else {
+      message.channel.send('😢 Solicitud de amistad rechazada.');
+    }
+  }).catch(() => message.channel.send('⏰ Tiempo agotado.'));
+}
+
+// --- UNBFF ---
+if (message.content.startsWith('>unbff')) {
+  const target = message.mentions.users.first();
+  if (!target || target.bot || target.id === message.author.id) {
+    return message.reply('❗ Menciona a una persona válida para quitar de tus mejores amig@s.');
+  }
+
+  const myList = getBffs(message.author.id);
+  const theirList = getBffs(target.id);
+
+  if (!myList.includes(target.id)) {
+    return message.reply('🤔 Esa persona no está en tu lista de mejores amig@s.');
+  }
+
+  // quitar en ambos sentidos
+  const newMine   = myList.filter(id => id !== target.id);
+  const newTheirs = theirList.filter(id => id !== message.author.id);
+
+  setBffs(message.author.id, newMine);
+  setBffs(target.id, newTheirs);
+
+  const conf = new EmbedBuilder()
+    .setColor(0xffd700)
+    .setTitle('✦ Mejor amistad removida')
+    .setDescription(`${message.author} y ${target} ya no son mejores amig@s.`);
+
+  return message.channel.send({ embeds: [conf] });
+}
+
+// --- BFFLIST ---
+if (message.content.startsWith('>bfflist')) {
+  const targetUser = message.mentions.users.first() || message.author;
+  const targetId = targetUser.id;
+
+  const ids = getBffs(targetId);
+  if (!ids.length) {
+    const empty = new EmbedBuilder()
+      .setColor(0xffd700)
+      .setTitle('✦ Lista de mejores amig@s ✦')
+      .setDescription(`${targetUser} no tiene mejores amig@s registrados todavía.`);
+    return message.channel.send({ embeds: [empty] });
+  }
+
+  // Obtener nombres bonitos (si alguien ya no está en el server, lo marcamos)
+  const members = await Promise.all(ids.map(id =>
+    message.guild.members.fetch(id).catch(() => null)
+  ));
+
+  const lines = members.map((m, i) => {
+    const name = m ? m.displayName : '— (usuario no disponible)';
+    return `**${i + 1}.** ✧ ${name}`;
+  });
+
+  const emb = new EmbedBuilder()
+    .setColor(0xffd700)
+    .setTitle('✦✦ Mejores amig@s ✦✦')
+    .setDescription([
+      `**Usuario:** ${targetUser}`,
+      '════════════════════',
+      ...lines,
+      '════════════════════',
+      '★ Para añadir: `>bffme @usuario`',
+      '☆ Para quitar: `>unbff @usuario`'
+    ].join('\n'));
+
+  return message.channel.send({ embeds: [emb] });
+}
 
   //For boosters only
   if (message.content === '>booster') {
