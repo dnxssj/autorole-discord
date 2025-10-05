@@ -82,10 +82,10 @@
   "rolesChannelId": "1406645622013952100",
   "nudgeIntervalHours": 8,
 
- "specialPhrase": {
+  "specialPhrase": {
     "userId": "734466902977544313",
-    "pattern": "Tengo razón?",
-    "regex": false,
+    "pattern": "tengo razón\\??",
+    "regex": true,
     "flags": "i",
     "wholeWord": false,
     "replyWhenUser": "Sí, Sofi, tienes razón",
@@ -94,4 +94,5 @@
     "ignoreBots": true,
     "channels": ["635059262002823169"]
   }
+
 }
