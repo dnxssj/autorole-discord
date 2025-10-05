@@ -8,6 +8,7 @@ import { initReactionRoles } from "./features/reactionRoles.js";
 import { initWelcomeSystem } from "./features/welcomeSystem.js";
 import { initAutoStar } from "./features/autoStar.js";
 import { autoBackup } from "./features/autoBackup.js";
+import { initAutoNudge } from "./features/autoNudge.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -56,6 +57,7 @@ initReactionRoles(client, config);
 initWelcomeSystem(client, config);
 initAutoStar(client, config);
 autoBackup(client, config); 
+initAutoNudge(client, config);
 
 const commands = new Map();
 
@@ -632,7 +634,8 @@ if (message.content.startsWith('>bfflist')) {
 if (message.content.startsWith('>bffmove')) {
   const args = message.content.trim().split(/\s+/).slice(1);
   const target = message.mentions.users.first();
-  const posArg = args.find(a => !a.startsWith('<@'));
+  const posArg = args.find(a => /^\d+$/.test(a)); // <-- más seguro
+
   if (!target || !posArg) {
     return message.reply('Uso: `>bffmove @usuario <pos>` (1 a 4)');
   }
@@ -642,11 +645,11 @@ if (message.content.startsWith('>bffmove')) {
   const idx = top.indexOf(target.id);
 
   if (idx === -1) {
-    return message.reply('❌ Esa persona no está en tu top de mejores amig@s.');
+    return message.reply('❌ Esa persona no está en tu **top 4** de mejores amig@s (usa `>bffme` o muévela al top primero).');
   }
 
-  let pos = parseInt(posArg, 10);
-  if (isNaN(pos) || pos < 1 || pos > 4) {
+  const pos = parseInt(posArg, 10);
+  if (pos < 1 || pos > 4) {
     return message.reply('⚠️ La posición debe ser un número del 1 al 4.');
   }
 
@@ -655,18 +658,19 @@ if (message.content.startsWith('>bffmove')) {
   const insertAt = Math.min(pos - 1, top.length);
   top.splice(insertAt, 0, target.id);
 
-  // reconstruir lista completa manteniendo el orden del top y luego la cola
+  // reconstruir lista completa manteniendo el top reordenado
   const tail = listFull.filter(id => !top.includes(id));
   setBffs(message.author.id, top.concat(tail));
 
-  // preview bonito
+  // preview
   const pretty = (await Promise.all(top.map(async (id) => {
     const m = await message.guild.members.fetch(id).catch(() => null);
     return m ? m.displayName : 'Desconocido';
-  }))).map((name, i) => `${i+1}. ${name}`).join('\n');
+  }))).map((name, i) => `${i + 1}. ${name}`).join('\n');
 
   return message.reply(`✅ Reordenado.\n**Tu top BFFs:**\n${pretty}`);
 }
+
 
 
   // Obtener nombres bonitos (si alguien ya no está en el server, lo marcamos)

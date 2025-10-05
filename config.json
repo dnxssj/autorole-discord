@@ -76,6 +76,11 @@
   "regionMessageId": "1409145881256661064",
   "ageMessageId": "1409145891176185876",
 
-  "levelUpChannelId": "635059262002823169"
+  "levelUpChannelId": "635059262002823169",
+  
+  "nudgeChannelId": "635059262002823169",
+  "rolesChannelId": "1406645622013952100",
+  "nudgeIntervalHours": 8
+
 
 }
