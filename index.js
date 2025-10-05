@@ -20,6 +20,9 @@ const parejasFile = './parejas.json';
 let parejasData = fs.existsSync(parejasFile) ? JSON.parse(fs.readFileSync(parejasFile)) : {};
 const amistadesFile = './amistades.json';
 let amistadesData = fs.existsSync(amistadesFile) ? JSON.parse(fs.readFileSync(amistadesFile)) : {};
+const BFF_XP_BONUS = 1200;    // XP por crear nueva mejor amistad
+const MARRY_XP_BONUS = 4000;  // XP por matrimonio aceptado
+
 
 // Helpers BFFs (soporta formato viejo string -> array)
 function getBffs(userId) {
@@ -140,7 +143,8 @@ client.on('messageCreate', async (message) => {
   \`>bffme @usuario\` → Elegir mejor amig@
   \`>love @usuario1 @usuario2\` → Calcula el porcentaje de éxito en el amor entre dos personas
   \`>bfflist @usuario\` → Ver lista de mejores amig@s  
-  \`>unbff @usuario\` → Quitar de tus mejores amig@s`
+  \`>unbff @usuario\` → Quitar de tus mejores amig@s 
+  \`>bffmove @usuario\` → Mueve a ese BFF a otra posición (1 al 4)`
 
         },
         {
@@ -441,6 +445,14 @@ if (message.content.startsWith('>relacion')) {
         parejasData[message.author.id] = target.id;
         parejasData[target.id] = message.author.id;
         fs.writeFileSync(parejasFile, JSON.stringify(parejasData, null, 2));
+
+        // XP extra para ambos por matrimonio
+        if (!xpData[message.author.id]) xpData[message.author.id] = { xp: 0, level: 0, lastRank: null };
+        if (!xpData[target.id]) xpData[target.id] = { xp: 0, level: 0, lastRank: null };
+        xpData[message.author.id].xp += MARRY_XP_BONUS;
+        xpData[target.id].xp += MARRY_XP_BONUS;
+        fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
+
         message.channel.send({
           embeds: [new EmbedBuilder()
             .setTitle('💖 ¡Nueva pareja!')
@@ -553,6 +565,14 @@ if (message.content.startsWith('>bffme')) {
       setBffs(message.author.id, mine);   // setBffs ya deduplica
       setBffs(target.id, theirs);
 
+      // XP extra para ambos por nueva mejor amistad
+      if (!xpData[message.author.id]) xpData[message.author.id] = { xp: 0, level: 0, lastRank: null };
+      if (!xpData[target.id]) xpData[target.id] = { xp: 0, level: 0, lastRank: null };
+      xpData[message.author.id].xp += BFF_XP_BONUS;
+      xpData[target.id].xp += BFF_XP_BONUS;
+      fs.writeFileSync(xpFile, JSON.stringify(xpData, null, 2));
+
+
       message.channel.send({
         embeds: [new EmbedBuilder()
           .setTitle('🤝 ¡Nueva mejor amistad!')
@@ -607,6 +627,47 @@ if (message.content.startsWith('>bfflist')) {
       .setDescription(`${targetUser} no tiene mejores amig@s registrados todavía.`);
     return message.channel.send({ embeds: [empty] });
   }
+
+  // >bffmove @usuario <pos>
+if (message.content.startsWith('>bffmove')) {
+  const args = message.content.trim().split(/\s+/).slice(1);
+  const target = message.mentions.users.first();
+  const posArg = args.find(a => !a.startsWith('<@'));
+  if (!target || !posArg) {
+    return message.reply('Uso: `>bffmove @usuario <pos>` (1 a 4)');
+  }
+
+  const listFull = getBffs(message.author.id);      // lista completa (ordenada)
+  const top = listFull.slice(0, 4);                 // top visible en >me
+  const idx = top.indexOf(target.id);
+
+  if (idx === -1) {
+    return message.reply('❌ Esa persona no está en tu top de mejores amig@s.');
+  }
+
+  let pos = parseInt(posArg, 10);
+  if (isNaN(pos) || pos < 1 || pos > 4) {
+    return message.reply('⚠️ La posición debe ser un número del 1 al 4.');
+  }
+
+  // quitar del top e insertar en la nueva posición (base 1 -> índice 0)
+  top.splice(idx, 1);
+  const insertAt = Math.min(pos - 1, top.length);
+  top.splice(insertAt, 0, target.id);
+
+  // reconstruir lista completa manteniendo el orden del top y luego la cola
+  const tail = listFull.filter(id => !top.includes(id));
+  setBffs(message.author.id, top.concat(tail));
+
+  // preview bonito
+  const pretty = (await Promise.all(top.map(async (id) => {
+    const m = await message.guild.members.fetch(id).catch(() => null);
+    return m ? m.displayName : 'Desconocido';
+  }))).map((name, i) => `${i+1}. ${name}`).join('\n');
+
+  return message.reply(`✅ Reordenado.\n**Tu top BFFs:**\n${pretty}`);
+}
+
 
   // Obtener nombres bonitos (si alguien ya no está en el server, lo marcamos)
   const members = await Promise.all(ids.map(id =>
