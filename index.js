@@ -630,49 +630,6 @@ if (message.content.startsWith('>bfflist')) {
     return message.channel.send({ embeds: [empty] });
   }
 
-  // >bffmove @usuario <pos>
-if (message.content.startsWith('>bffmove')) {
-  const args = message.content.trim().split(/\s+/).slice(1);
-  const target = message.mentions.users.first();
-  const posArg = args.find(a => /^\d+$/.test(a)); // <-- más seguro
-
-  if (!target || !posArg) {
-    return message.reply('Uso: `>bffmove @usuario <pos>` (1 a 4)');
-  }
-
-  const listFull = getBffs(message.author.id);      // lista completa (ordenada)
-  const top = listFull.slice(0, 4);                 // top visible en >me
-  const idx = top.indexOf(target.id);
-
-  if (idx === -1) {
-    return message.reply('❌ Esa persona no está en tu **top 4** de mejores amig@s (usa `>bffme` o muévela al top primero).');
-  }
-
-  const pos = parseInt(posArg, 10);
-  if (pos < 1 || pos > 4) {
-    return message.reply('⚠️ La posición debe ser un número del 1 al 4.');
-  }
-
-  // quitar del top e insertar en la nueva posición (base 1 -> índice 0)
-  top.splice(idx, 1);
-  const insertAt = Math.min(pos - 1, top.length);
-  top.splice(insertAt, 0, target.id);
-
-  // reconstruir lista completa manteniendo el top reordenado
-  const tail = listFull.filter(id => !top.includes(id));
-  setBffs(message.author.id, top.concat(tail));
-
-  // preview
-  const pretty = (await Promise.all(top.map(async (id) => {
-    const m = await message.guild.members.fetch(id).catch(() => null);
-    return m ? m.displayName : 'Desconocido';
-  }))).map((name, i) => `${i + 1}. ${name}`).join('\n');
-
-  return message.reply(`✅ Reordenado.\n**Tu top BFFs:**\n${pretty}`);
-}
-
-
-
   // Obtener nombres bonitos (si alguien ya no está en el server, lo marcamos)
   const members = await Promise.all(ids.map(id =>
     message.guild.members.fetch(id).catch(() => null)
@@ -692,10 +649,59 @@ if (message.content.startsWith('>bffmove')) {
       ...lines,
       '════════════════════',
       '★ Para añadir: `>bffme @usuario`',
-      '☆ Para quitar: `>unbff @usuario`'
+      '☆ Para quitar: `>unbff @usuario`',
+      '✧ Para mover: `>bffmove @usuario 1-4`'
     ].join('\n'));
 
   return message.channel.send({ embeds: [emb] });
+}
+
+// --- BFFMOVE ---
+if (message.content.startsWith('>bffmove')) {
+  // Uso: >bffmove @usuario <pos>   (pos: 1..4)
+  const args = message.content.trim().split(/\s+/).slice(1);
+  const target = message.mentions.users.first();
+  const posArg = args.find(a => /^\d+$/.test(a)); // primer número
+
+  if (!target || !posArg) {
+    return message.reply('Uso: `>bffmove @usuario <pos>` (1 a 4)');
+  }
+
+  const pos = parseInt(posArg, 10);
+  if (pos < 1 || pos > 4) {
+    return message.reply('⚠️ La posición debe ser un número del 1 al 4.');
+  }
+
+  const listFull = getBffs(message.author.id); // lista completa (orden actual)
+  if (!listFull.length) {
+    return message.reply('Aún no tienes mejores amig@s. Usa `>bffme @alguien` primero.');
+  }
+
+  // SOLO reordenamos el top 4 (lo que se muestra en >me)
+  const top = listFull.slice(0, 4);
+  const idx = top.indexOf(target.id);
+  if (idx === -1) {
+    return message.reply('❌ Esa persona no está en tu **top 4** de mejores amig@s.');
+  }
+
+  // reordenar dentro del top
+  top.splice(idx, 1);
+  const insertAt = Math.min(pos - 1, top.length);
+  top.splice(insertAt, 0, target.id);
+
+  // reconstruir lista final: top reordenado + cola
+  const tail = listFull.filter(id => !top.includes(id));
+  setBffs(message.author.id, top.concat(tail));
+
+  // preview
+  const pretty = (await Promise.all(
+    top.map(async (id) => {
+      const m = await message.guild.members.fetch(id).catch(() => null);
+      return m ? m.displayName : 'Desconocido';
+    })
+  )).map((name, i) => `${i + 1}. ${name}`).join('\n');
+
+  return message.reply(`✅ Reordenado.\n**Tu top BFFs:**\n${pretty}`);
 }
 
   //For boosters only

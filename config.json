@@ -84,8 +84,8 @@
 
   "specialPhrase": {
     "userId": "734466902977544313",
-    "pattern": "tengo razon\\s*\\??",
-    "regex": true,
+    "pattern": "tengo razon",
+    "regex": false,
     "flags": "i",
     "wholeWord": false,
     "replyWhenUser": "Sí, Sofi, tienes razón",
@@ -94,6 +94,7 @@
     "ignoreBots": true,
     "channels": ["635059262002823169"]
   }
+
 
 
 }
