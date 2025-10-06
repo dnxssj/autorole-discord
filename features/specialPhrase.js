@@ -1,4 +1,4 @@
-// features/specialPhraseReplies.js
+// features/specialPhrase.js
 function normalize(s = "") {
   return s
     .toLowerCase()
@@ -19,7 +19,7 @@ function makeMatcher({ pattern, regex = false, flags = "i", wholeWord = false })
   return new RegExp(core, flags);
 }
 
-export function initSpecialPhraseReplies(client, config) {
+export function initSpecialPhrase(client, config) {
   const cfg = config?.specialPhrase;
   if (!cfg || !cfg.userId || !cfg.pattern) return;
 
@@ -54,7 +54,7 @@ export function initSpecialPhraseReplies(client, config) {
       const replyTxt = isSpecial ? cfg.replyWhenUser : cfg.replyWhenOthers;
       if (replyTxt) await message.reply(replyTxt).catch(() => null);
     } catch (e) {
-      console.error("[specialPhraseReplies] error:", e);
+      console.error("[specialPhrase] error:", e);
     }
   });
 }
