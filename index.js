@@ -9,7 +9,7 @@ import { initWelcomeSystem } from "./features/welcomeSystem.js";
 import { initAutoStar } from "./features/autoStar.js";
 import { autoBackup } from "./features/autoBackup.js";
 import { initAutoNudge } from "./features/autoNudge.js";
-import { initSpecialPhrase } from "./features/specialPhraseReplies.js";
+import { initSpecialPhrase } from "./features/specialPhrase.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
