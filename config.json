@@ -93,7 +93,15 @@
     "cooldownSec": 4,
     "ignoreBots": true,
     "channels": ["635059262002823169"]
-  }
+  },
+
+  "specialRoles": {
+  "admin": { "match": ["admin"], "color": "#e74c3c" },
+  "mod":   { "match": ["mod", "moderador"], "color": "#2ecc71" },
+  "vip":   { "match": ["vip"], "color": "#f1c40f" },
+  "booster": { "match": ["booster"], "color": "#ac87ff" }
+}
+
 
 
 

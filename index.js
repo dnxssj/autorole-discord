@@ -252,7 +252,10 @@ if (message.content.startsWith('>me')) {
 
   const member = await message.guild.members.fetch(targetId);
   const parejaId = parejasData[targetId];
-  const pareja = parejaId ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido' : 'Solter@';
+  const pareja = parejaId
+    ? (await message.guild.members.fetch(parejaId).catch(() => null))?.displayName || 'Desconocido'
+    : 'Solter@';
+
   // BFFs (hasta 4 nombres)
   const bffNames = [];
   for (const id of bffIds) {
@@ -261,15 +264,42 @@ if (message.content.startsWith('>me')) {
   }
   const bffText = bffNames.length ? bffNames.join(', ') : 'Sin mejores amig@s';
 
+  // --- roles visibles ---
+  const managedOrEveryone = (r) => r.managed || r.name === "@everyone";
+  const roles = member.roles.cache
+    .filter(r => !managedOrEveryone(r))
+    .sort((a, b) => b.rawPosition - a.rawPosition)
+    .map(r => r.name);
 
-  const canvas = createCanvas(600, 600);
+  const MAX_ROLES_SHOWN = 6;
+  const shownRoles = roles.slice(0, MAX_ROLES_SHOWN);
+  const moreCount = Math.max(0, roles.length - shownRoles.length);
+
+  // estilos especiales (puedes mover esto a config.specialRoles si quieres)
+  const specialCfg = config.specialRoles || {
+    admin:   { match: ["admin"],           color: "#e74c3c" },
+    mod:     { match: ["mod","moderador"], color: "#2ecc71" },
+    vip:     { match: ["vip"],             color: "#f1c40f" },
+    booster: { match: ["booster"],         color: "#ac87ff" }
+  };
+  function getSpecialColor(roleName) {
+    const n = roleName.toLowerCase();
+    for (const key of Object.keys(specialCfg)) {
+      const def = specialCfg[key];
+      const hits = (def.match || []).some(m => n.includes(m.toLowerCase()));
+      if (hits) return def.color;
+    }
+    return null;
+  }
+
+  // --- canvas ---
+  const canvas = createCanvas(600, 680); // algo más alto por si hay muchas píldoras
   const ctx = canvas.getContext('2d');
 
-  //Booster
+  // Fondo según rol
   const vipRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('vip'));
   const boosterRole = message.guild.roles.cache.find(r => r.name.toLowerCase().includes('booster'));
   const isBooster = boosterRole && member.roles.cache.has(boosterRole.id) && !(vipRole && member.roles.cache.has(vipRole.id));
-
 
   let fondo;
   if (vipRole && member.roles.cache.has(vipRole.id)) {
@@ -279,8 +309,7 @@ if (message.content.startsWith('>me')) {
   } else {
     fondo = await loadImage('./me_background_discord.jpg');
   }
-
-ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
   const cx = canvas.width / 2;
 
@@ -291,31 +320,32 @@ ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
   const avatar = await loadImage(targetUser.displayAvatarURL({ extension: 'png', forceStatic: true, size: 128 }));
 
-
+  // borde avatar
   ctx.save();
   ctx.beginPath();
-  let borderColor = '#4A90E2'; // normal
+  let borderColor = '#4A90E2';
   if (vipRole && member.roles.cache.has(vipRole.id)) borderColor = '#FFD700';
   else if (isBooster) borderColor = '#AC87FF';
-
   ctx.arc(cx, 110, 66, 0, Math.PI * 2);
   ctx.fillStyle = borderColor;
   ctx.fill();
   ctx.closePath();
+
+  // avatar
   ctx.beginPath();
   ctx.arc(cx, 110, 64, 0, Math.PI * 2);
   ctx.clip();
   ctx.drawImage(avatar, cx - 64, 46, 128, 128);
   ctx.restore();
 
+  // textos top
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 36px Roboto';
   let displayName = member.displayName.toUpperCase();
-if (boosterRole && member.roles.cache.has(boosterRole.id)) {
-  displayName = `★ ${displayName} ★`;
-}
-
+  if (boosterRole && member.roles.cache.has(boosterRole.id)) {
+    displayName = `★ ${displayName} ★`;
+  }
   ctx.fillText(displayName, cx, 210);
 
   ctx.font = '22px Roboto';
@@ -326,10 +356,121 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   ctx.fillText(`Relación: ${pareja}`, cx, 320);
   ctx.fillText(`Mejores amig@s: ${bffText}`, cx, 350);
 
+  // ---- Helpers pills (una única versión, sin duplicados) ----
+  function measurePillWidth(ctx, text, paddingX = 10) {
+    ctx.save();
+    ctx.font = '16px Roboto';
+    const w = ctx.measureText(text).width + paddingX * 2;
+    ctx.restore();
+    return w;
+  }
+
+  function drawPill(ctx, text, x, y, paddingX = 10, paddingY = 6, bg = "#ffffff", fg = "#000000") {
+    ctx.save();
+    ctx.font = '16px Roboto';
+    const w = ctx.measureText(text).width + paddingX * 2;
+    const h = 26; // altura fija
+    const r = h / 2;
+
+    // fondo redondeado
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    // texto
+    ctx.fillStyle = fg;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, x + paddingX, y + h / 2);
+    ctx.restore();
+
+    return { w, h };
+  }
+
+  // Dibuja roles en múltiples líneas y devuelve altura usada + última coord
+  function drawRolesRow(ctx, roleNames, startX, startY, maxWidth) {
+    ctx.save();
+    let x = startX;
+    let y = startY;
+    const gap = 8;
+    let height = 0;
+
+    for (const name of roleNames) {
+      const special = getSpecialColor(name);
+      const bg = special || "rgba(255,255,255,0.9)";
+      const fg = special ? "#ffffff" : "#111111"; // texto blanco si fondo especial
+
+      const testW = measurePillWidth(ctx, name, 10);
+      if (x + testW > startX + maxWidth) {
+        x = startX;
+        y += 34;   // salto de línea
+        height += 34;
+      }
+
+      const { w } = drawPill(ctx, name, x, y, 10, 6, bg, fg);
+      x += w + gap;
+
+      if (height === 0) height = 26; // primera línea ocupa 26px
+    }
+
+    if (height === 0) height = 26;
+    ctx.restore();
+    return { height, lastX: x, lastY: y };
+  }
+
+  // --- Título Roles ---
+  ctx.font = 'bold 20px Roboto';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = "center";
+  ctx.fillText('Roles', cx, 380);
+
+  // Área de roles
+  const rolesAreaWidth = 460;
+  const rolesStartX = (canvas.width - rolesAreaWidth) / 2;
+  const rolesStartY = 400;
+
+  let rolesBlock = { height: 0, lastX: rolesStartX, lastY: rolesStartY };
+
+  if (shownRoles.length === 0) {
+    ctx.font = '16px Roboto';
+    ctx.fillStyle = '#333';
+    ctx.textAlign = "center";
+    ctx.fillText('— Sin roles —', cx, rolesStartY + 16);
+    rolesBlock.height = 30;
+  } else {
+    rolesBlock = drawRolesRow(ctx, shownRoles, rolesStartX, rolesStartY, rolesAreaWidth);
+
+    // “+N más” si hay más roles
+    if (moreCount > 0) {
+      const pillText = `+${moreCount} más`;
+      const testW = measurePillWidth(ctx, pillText, 10);
+      let px = rolesBlock.lastX;
+      let py = rolesBlock.lastY;
+      if (px + testW > rolesStartX + rolesAreaWidth) {
+        px = rolesStartX;
+        py += 34;
+        rolesBlock.height += 34;
+      }
+      drawPill(ctx, pillText, px, py, 10, 6, "#eeeeee", "#333333");
+    }
+  }
+
+  // --- Barra XP debajo de roles ---
   const barWidth = 300;
   const barHeight = 24;
   const barX = (canvas.width - barWidth) / 2;
-  const barY = 400;
+  const barY = rolesStartY + rolesBlock.height + 36;
 
   ctx.fillStyle = '#ddd';
   ctx.beginPath();
@@ -345,9 +486,8 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
   ctx.closePath();
   ctx.fill();
 
-  let barStartColor = '#7FB3D5'; // default (normal)
-  let barEndColor = '#4A90E2';   // default (normal)
-
+  let barStartColor = '#7FB3D5';
+  let barEndColor = '#4A90E2';
   if (vipRole && member.roles.cache.has(vipRole.id)) {
     barStartColor = '#FFD700';
     barEndColor = '#FFC107';
@@ -355,11 +495,10 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
     barStartColor = '#AC87FF';
     barEndColor = '#7C4DFF';
   }
- 
+
   const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
   gradient.addColorStop(0, barStartColor);
   gradient.addColorStop(1, barEndColor);
-
 
   ctx.fillStyle = gradient;
   ctx.beginPath();
@@ -377,6 +516,7 @@ if (boosterRole && member.roles.cache.has(boosterRole.id)) {
 
   ctx.font = '18px Roboto';
   ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
   ctx.fillText(`${userData.xp} / ${requiredXp}`, canvas.width / 2, barY + 17);
 
   const buffer = canvas.toBuffer('image/png');
