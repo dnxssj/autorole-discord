@@ -10,6 +10,7 @@ import { initAutoStar } from "./features/autoStar.js";
 import { autoBackup } from "./features/autoBackup.js";
 import { initAutoNudge } from "./features/autoNudge.js";
 import { initSpecialPhrase } from "./features/specialPhrase.js";
+import { initRanking } from "./features/ranking.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -60,6 +61,7 @@ initAutoStar(client, config);
 autoBackup(client, config); 
 initAutoNudge(client, config);
 initSpecialPhrase(client, config);
+initRanking(client, config, () => xpData);
 
 const commands = new Map();
 
@@ -900,6 +902,7 @@ if (!message.content.startsWith('>')) {
   if (!xpData[authorId]) xpData[authorId] = { xp: 0, level: 0, lastRank: null };
   const userXp = xpData[authorId];
 
+  userXp.msgs = (userXp.msgs || 0) + 1;
   userXp.xp += Math.floor(Math.random() * 10) + 5;
 
   const level = Math.floor(0.1 * Math.sqrt(userXp.xp));
