@@ -11,6 +11,7 @@ import { autoBackup } from "./features/autoBackup.js";
 import { initAutoNudge } from "./features/autoNudge.js";
 import { initSpecialPhrase } from "./features/specialPhrase.js";
 import { initRanking } from "./features/ranking.js";
+import { initBackfillMsgs } from "./features/backfillMsgs.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -62,6 +63,12 @@ autoBackup(client, config);
 initAutoNudge(client, config);
 initSpecialPhrase(client, config);
 initRanking(client, config, () => xpData);
+initBackfillMsgs(
+  client,
+  config,
+  () => xpData,                 // getter del objeto en memoria
+  () => "./xp.json"             // ruta al archivo para guardar
+);
 
 const commands = new Map();
 
