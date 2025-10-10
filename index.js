@@ -12,6 +12,7 @@ import { initAutoNudge } from "./features/autoNudge.js";
 import { initSpecialPhrase } from "./features/specialPhrase.js";
 import { initRanking } from "./features/ranking.js";
 import { initBackfillMsgs } from "./features/backfillMsgs.js";
+import { initSpotify } from "./features/spotify.js";
 
 registerFont('./fonts/static/Roboto-Bold.ttf', { family: 'Roboto', weight: 'bold' });
 registerFont('./fonts/static/Roboto-Light.ttf', { family: 'Roboto', weight: 'light' });
@@ -69,6 +70,7 @@ initBackfillMsgs(
   () => xpData,                 // getter del objeto en memoria
   () => "./xp.json"             // ruta al archivo para guardar
 );
+initSpotify(client, config);
 
 const commands = new Map();
 
@@ -140,7 +142,8 @@ client.on('messageCreate', async (message) => {
   \`>help\` → Muestra esta ayuda  
   \`>rank\` → Muestra tu nivel y XP  
   \`>me\` → Muestra tu perfil visual  
-  \`>relacion\` → Muestra tu pareja y tu mejor amig@`
+  \`>ranking\` → Muestra el ranking de niveles del servidor
+  \`>spotify\` → Muestra la playlist colaborativa del server en spotify`
         },
         {
           name: "💎 Server Booster",
@@ -153,6 +156,7 @@ client.on('messageCreate', async (message) => {
           value: `
   \`>marryme @usuario\` → Solicitar relación  
   \`>divorce\` → Pedir divorcio  
+  \`>relacion\` → Muestra tu pareja y tu mejor amig@
   \`>bffme @usuario\` → Elegir mejor amig@
   \`>love @usuario1 @usuario2\` → Calcula el porcentaje de éxito en el amor entre dos personas
   \`>bfflist @usuario\` → Ver lista de mejores amig@s  

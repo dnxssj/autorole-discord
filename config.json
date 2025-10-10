@@ -100,7 +100,10 @@
   "mod":   { "match": ["mod", "moderador"], "color": "#2ecc71" },
   "vip":   { "match": ["vip"], "color": "#f1c40f" },
   "booster": { "match": ["booster"], "color": "#ac87ff" }
-}
+},
+
+  "sharedSpotifyPlaylistUrl": "https://open.spotify.com/playlist/4l7MthWd9qlAqZn6PffqJg?si=c16fd61528ad446d",
+  "playlistNote": "Si no puedes añadir canciones, pide acceso a un admin."
 
 
 
