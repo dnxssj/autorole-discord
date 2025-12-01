@@ -56,10 +56,10 @@
   },
 
     "regionRoles": {
-    "emojigg_1": { "name": "Europa",   "emojiId": "1409107708803678239" },
+    "emojigg_1": { "name": "EU",   "emojiId": "1409107708803678239" },
     "emojigg_2": { "name": "Latam",    "emojiId": "1409107770258751498" },
-    "emojigg_3": { "name": "Norteamérica", "emojiId": "1409107812587667530" },
-    "emojigg_4": { "name": "Otro", "emojiId": "1409113283159523419"}
+    "emojigg_3": { "name": "NA", "emojiId": "1409107812587667530" },
+    "emojigg_4": { "name": "Otra Región", "emojiId": "1409113283159523419"}
   },
   "ageRoles": {
     "emojigg_1": { "name": "+18", "emojiId": "1409107708803678239" },
