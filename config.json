@@ -78,12 +78,12 @@
 
   "levelUpChannelId": "635059262002823169",
   
-  "nudgeChannelId": "635059262002823169",
-  "rolesChannelId": "1406645622013952100",
+  "nudgeChannelId": "1306709272029167668",
+  "rolesChannelId": "1437399744480809102",
   "nudgeIntervalHours": 8,
 
   "specialPhrase": {
-    "userId": "734466902977544313",
+    "userId": "746490484595097630",
     "pattern": "tengo razon",
     "regex": false,
     "flags": "i",
@@ -92,7 +92,7 @@
     "replyWhenOthers": "Tú calla, guarro",
     "cooldownSec": 4,
     "ignoreBots": true,
-    "channels": ["635059262002823169"]
+    "channels": ["1306709272029167668"]
   },
 
   "specialRoles": {
@@ -102,7 +102,7 @@
   "booster": { "match": ["booster"], "color": "#ac87ff" }
 },
 
-  "sharedSpotifyPlaylistUrl": "https://open.spotify.com/playlist/4l7MthWd9qlAqZn6PffqJg?si=c16fd61528ad446d",
+  "sharedSpotifyPlaylistUrl": "#",
   "playlistNote": "Si no puedes añadir canciones, pide acceso a un admin."
 
 

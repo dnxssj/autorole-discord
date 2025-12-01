@@ -918,7 +918,7 @@ if (!message.content.startsWith('>')) {
 
   const level = Math.floor(0.1 * Math.sqrt(userXp.xp));
   const getRequiredXp = lvl => Math.floor(Math.pow((lvl + 1) / 0.1, 2));
-  const rankRoles = { 10: 'Nivel 1 ~ Nova', 50: 'Nivel 2 ~ Spectra', 100: 'Nivel 3 ~ Blight', 200: 'Nivel 4 ~ Cyanite', 300: 'Nivel 5 ~ Velkyr', 400: 'Nivel 6 ~ Oblivion', 500: 'Nivel 7 ~ Sunfall', 600: 'Nivel 8 ~ Cryora', 800: 'Nivel 9 ~ Ashen', 1000: 'Nivel 10 ~ Zenthyr', 5000: 'YAPPER', 10000: 'VIP' };
+  const rankRoles = { 10: 'Rango 1 ~ Fuerzas Regulares', 50: 'Rango 2 ~ Estudiantes de Academia', 100: 'Rango 3 ~ Genin', 200: 'Rango 4 ~ Chunin', 300: 'Rango 5 ~ Jonin', 400: 'Rango 6 ~ Héroe de la Aldea', 500: 'Rango 7 ~ Anbu', 600: 'Rango 8 ~ Sannin', 800: 'Rango 9 ~ Salvador de la Aldea', 1000: 'Rango 10 ~ Kenjakage', 5000: 'YAPPER', 10000: 'VIP' };
   const getRankName = lvl => {
     return Object.entries(rankRoles).reverse().find(([l]) => lvl >= l)?.[1] || null;
   };
